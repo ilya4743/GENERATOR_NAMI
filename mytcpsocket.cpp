@@ -16,7 +16,7 @@ void MyTcpSocket::doConnect()
     qDebug() << "connecting...";
 
     // this is not blocking call
-    socket->connectToHost("localhost", 2626);
+    socket->connectToHost("localhost", 15555);
 
     // we need to wait...
     if(!socket->waitForConnected(5000))
@@ -28,7 +28,7 @@ void MyTcpSocket::doConnect()
 void MyTcpSocket::connected()
 {
     qDebug() << "connected...";
-    float width=18.1;
+    /*float width=18.1;
 
     float height=5.1;
     float step=0.1;
@@ -64,7 +64,7 @@ void MyTcpSocket::connected()
 
     //высота покрытия сетки графа
     socket->write(arr);
-    //socket->flush();
+    //socket->flush();*/
 
 }
 
@@ -95,5 +95,23 @@ void MyTcpSocket::readyRead()
     else
     qDebug()<<"Error "<<error;
 
-    socket->disconnectFromHost();
+    //socket->disconnectFromHost();
+}
+
+void MyTcpSocket::sendData(QByteArray& arr)
+{
+    /*QByteArray arr;
+    QDataStream dataStream(&arr, QIODevice::WriteOnly);
+    dataStream.setFloatingPointPrecision(QDataStream::SinglePrecision);
+    dataStream.setByteOrder(QDataStream::LittleEndian);
+    dataStream<<(unsigned char)0x44<<(unsigned char)0x47;
+
+    for(int i=0; i<3;i++)
+        dataStream<<data[i];
+    dataStream<<int(data[3]);
+
+    for(int i=4; i<data.size()-1; i++)
+    dataStream<<data[data.size()-1];*/
+    socket->write(arr);
+    socket->flush();
 }

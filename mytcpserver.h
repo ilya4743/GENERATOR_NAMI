@@ -4,12 +4,14 @@
 #include <QDataStream>
 #include <QObject>
 #include <QTcpServer>
+#include <vector>
 
 class MyTcpServer : public QObject
 {
     Q_OBJECT
 public:
     explicit MyTcpServer(QObject *parent = nullptr);
+    void sendData(std::vector<float>& data);
 
 signals:
 

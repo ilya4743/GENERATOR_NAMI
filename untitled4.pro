@@ -9,6 +9,7 @@ CONFIG -= app_bundle
 
 SOURCES += \
         main.cpp \
+        mainwindow.cpp \
         mytcpserver.cpp \
         mytcpsocket.cpp
 
@@ -18,5 +19,15 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    mainwindow.h \
     mytcpserver.h \
     mytcpsocket.h
+
+FORMS += \
+    mainwindow.ui
+
+QT       += core gui
+
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+CONFIG += c++11

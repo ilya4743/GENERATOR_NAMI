@@ -11,7 +11,7 @@ class MyTcpSocket : public QObject
     Q_OBJECT
 public:
     explicit MyTcpSocket(QObject *parent = 0);
-
+    void sendData(QByteArray& arr);
     void doConnect();
 
 signals:
@@ -24,7 +24,6 @@ public slots:
 
 private:
     QTcpSocket *socket;
-
 };
 
 #endif // MYTCPSOCKET_H

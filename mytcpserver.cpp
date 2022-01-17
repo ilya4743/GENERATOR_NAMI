@@ -25,6 +25,8 @@ void MyTcpServer::newConnection()
     connect(socket,SIGNAL(readyRead()),this,SLOT(readyRead()));
 
     qDebug() << "connected...";
+
+    /*
     float width=11;
     float height=10;
     float step=1;
@@ -56,7 +58,7 @@ void MyTcpServer::newConnection()
 
     //высота покрытия сетки графа
     socket->write(arr);
-    socket->flush();
+    socket->flush();*/
 }
 
 void MyTcpServer::readyRead()
@@ -114,4 +116,22 @@ void MyTcpServer::readyRead()
     socket->write(arr);
     socket->flush();*/
     //socket->disconnectFromHost();
+}
+
+void MyTcpServer::sendData(std::vector<float>& data)
+{
+    QByteArray arr;
+    QDataStream dataStream(&arr, QIODevice::WriteOnly);
+    dataStream.setFloatingPointPrecision(QDataStream::SinglePrecision);
+    dataStream.setByteOrder(QDataStream::LittleEndian);
+    dataStream<<(unsigned char)0x44<<(unsigned char)0x47;
+
+    for(int i=0; i<3;i++)
+        dataStream<<data[i];
+    dataStream<<int(data[3]);
+
+    for(int i=4; i<data.size()-1; i++)
+    dataStream<<data[data.size()-1];
+    socket->write(arr);
+    socket->flush();
 }
