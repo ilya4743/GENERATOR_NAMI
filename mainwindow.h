@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QLineEdit>
 #include <QLabel>
+#include <QComboBox>
 #include <vector>
 #include <mytcpserver.h>
 #include "mytcpsocket.h"
@@ -40,6 +41,7 @@ private slots:
     void textChangedBarrier3(const QString &arg1);
     void textChangedBarrier4(const QString &arg1);
 
+    void currentIndexCenterChanged(int index);
     void on_comboBox_currentIndexChanged(int index);
 
     void on_pushButton_2_clicked();
@@ -52,5 +54,6 @@ private:
     MyTcpServer* server;
     MyTcpSocket* socket;
     vector<Barrier> vec_barrier;
+    QComboBox qComboBox;
 };
 #endif // MAINWINDOW_H

@@ -43,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 
     this->vec_line_edit.reserve(9);
     this->vec_label.reserve(9);
-    for(int i=0; i<9; i++)
+    for(unsigned int i=0; i<9; i++)
     {
         this->vec_line_edit.push_back(new QLineEdit());
         this->vec_line_edit[i]->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
@@ -55,11 +55,21 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
         ui->formLayout->addRow(this->vec_label[i], this->vec_line_edit[i]);
     }
 
-    for(int i=9; i<vec_str_param.size();i++)
+    ui->formLayout->addWidget(&qComboBox);
+    qComboBox.setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
+
+    qComboBox.addItem("Вручную");
+    qComboBox.addItem("По центру");
+    qComboBox.addItem("По центру cнизу");
+    qComboBox.addItem("По центру слева");
+    qComboBox.addItem("По центру справа");
+    qComboBox.addItem("По центру сверху");
+
+    for(unsigned int i=9; i<vec_str_param.size();i++)
     {
         this->vec_line_edit.push_back(new QLineEdit());
         this->vec_line_edit[i]->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-        this->vec_line_edit[i]->setText("0");
+        this->vec_line_edit[i]->setText(vec_str_data[i]);
 
         //this->vec_line_edit[i]->setValidator(validator);
         this->vec_label.push_back(new QLabel(vec_str_param[i]));
@@ -68,7 +78,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     }
 
     if(vec_line_edit[8]->text().toInt()==0)
-        for(int i=9; i<vec_str_param.size();i++)
+        for(unsigned int i=9; i<vec_str_param.size();i++)
             vec_line_edit[i]->setEnabled(false);
 
     connect(this->vec_line_edit[8], SIGNAL(textChanged(const QString &)),this, SLOT(textChanged(const QString &)));
@@ -77,6 +87,49 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     connect(this->vec_line_edit[11], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier3(const QString &)));
     connect(this->vec_line_edit[12], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier4(const QString &)));
 
+    //for(int i=0; i<3; i++)
+    //    connect(this->vec_line_edit[i], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier4(const QString &)));
+
+    connect(&qComboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(currentIndexCenterChanged(int )));
+}
+
+void MainWindow::currentIndexCenterChanged(int index)
+{
+    int width, height;
+    width=vec_line_edit[0]->text().toFloat()/vec_line_edit[2]->text().toFloat();
+    height=vec_line_edit[1]->text().toFloat()/vec_line_edit[2]->text().toFloat();
+    switch(index)
+    {
+        case 0:
+            vec_line_edit[3]->setEnabled(true);
+        break;
+
+        case 1:
+            vec_line_edit[3]->setEnabled(false);
+            vec_line_edit[3]->setText(QVariant((width / 2) + (height/2)*(width)).toString());
+        break;
+
+        case 2:
+            vec_line_edit[3]->setEnabled(false);
+            vec_line_edit[3]->setText(QVariant((width / 2) + (height-1)*(width)).toString());
+        break;
+
+        case 3:
+            vec_line_edit[3]->setEnabled(false);
+            vec_line_edit[3]->setText(QVariant((height/2)*(width)).toString());
+        break;
+
+        case 4:
+            vec_line_edit[3]->setEnabled(false);
+            vec_line_edit[3]->setText(QVariant((width-1) + (height/2)*(width)).toString());
+        break;
+
+        case 5:
+            vec_line_edit[3]->setEnabled(false);
+            vec_line_edit[3]->setText(QVariant((width / 2)).toString());
+
+        break;
+    }
 }
 
 void MainWindow::textChangedBarrier1(const QString &arg1)
@@ -104,13 +157,13 @@ void MainWindow::textChanged(const QString &arg1)
 
     if(vec_line_edit[8]->text().toInt()==0)
     {
-        for(int i=9; i<vec_line_edit.size();i++)
+        for(unsigned int i=9; i<vec_line_edit.size();i++)
             vec_line_edit[i]->setEnabled(false);
         vec_barrier.clear();
     }
     else
     {
-        for(int i=9; i<vec_line_edit.size();i++)
+        for(unsigned int i=9; i<vec_line_edit.size();i++)
             vec_line_edit[i]->setEnabled(true);
         vec_barrier.resize(vec_line_edit[8]->text().toInt());
     }
