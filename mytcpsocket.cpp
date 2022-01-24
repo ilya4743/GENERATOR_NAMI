@@ -1,5 +1,9 @@
 #include "mytcpsocket.h"
 #include<QDataStream>
+#include <QTimer>
+#include<QTime>
+#include<QCoreApplication>
+
 MyTcpSocket::MyTcpSocket(QObject *parent) : QObject(parent)
 {
 }
@@ -83,21 +87,59 @@ void MyTcpSocket::bytesWritten(qint64 bytes)
 void MyTcpSocket::readyRead()
 {
     QDataStream in(socket);
+    in.setFloatingPointPrecision(QDataStream::SinglePrecision);
+    in.setByteOrder(QDataStream::LittleEndian);
     float x,y;
-    int error;
-    in>>error;
-    if(error==0)
+    unsigned char b1, b2;
+    in>>b1>>b2;
+    int n;
+    in>>n;
+    if(b1==0x44&&b2==0x48)
         while(socket->bytesAvailable())
         {
             in>>x>>y;
             qDebug()<<x<<'\t'<<y;
         }
-    else
-    qDebug()<<"Error "<<error;
-
-    //socket->disconnectFromHost();
 }
 
+void MyTcpSocket::readyRead1()
+{
+    QDataStream in(socket);
+    in.setFloatingPointPrecision(QDataStream::SinglePrecision);
+    in.setByteOrder(QDataStream::LittleEndian);
+    float x,y;
+    unsigned char b1, b2;
+    in>>b1>>b2;
+    int n;
+    in>>n;
+    if(b1==0x44&&b2==0x48&&n>0)
+    {        in>>x>>y;
+
+    wnd->recalculateData(Point (x,y));
+    wnd->makePack();
+    }
+}
+
+void MyTcpSocket::auto_mode(bool isAuto)
+{
+    if(isAuto)
+    {
+        disconnect(socket, SIGNAL(readyRead()),this, SLOT(readyRead()));
+        connect(socket, SIGNAL(readyRead()),this, SLOT(readyRead1()));
+    }
+    else
+    {
+        disconnect(socket, SIGNAL(readyRead()),this, SLOT(readyRead1()));
+        connect(socket, SIGNAL(readyRead()),this, SLOT(readyRead()));
+    }
+}
+
+void delay()
+{
+    QTime dieTime= QTime::currentTime().addSecs(1);
+    while (QTime::currentTime() < dieTime)
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+}
 void MyTcpSocket::sendData(QByteArray& arr)
 {
     /*QByteArray arr;
@@ -114,4 +156,6 @@ void MyTcpSocket::sendData(QByteArray& arr)
     dataStream<<data[data.size()-1];*/
     socket->write(arr);
     socket->flush();
+    //delay();
+
 }

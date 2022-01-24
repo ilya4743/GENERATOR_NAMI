@@ -11,7 +11,8 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
         mytcpserver.cpp \
-        mytcpsocket.cpp
+        mytcpsocket.cpp \
+        point.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -21,7 +22,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     mainwindow.h \
     mytcpserver.h \
-    mytcpsocket.h
+    mytcpsocket.h \
+    point.h
 
 FORMS += \
     mainwindow.ui
