@@ -62,6 +62,7 @@ private:
     MyTcpServer* server;
     MyTcpSocket* socket;
     vector<Barrier> vec_barrier;
+    vector<Barrier> vec_buf_barrier;
     QComboBox qComboBox;
     Point goal_point;
 public:

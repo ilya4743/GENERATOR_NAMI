@@ -283,12 +283,21 @@ void MainWindow::on_comboBox_currentIndexChanged(int index)
     vec_line_edit[12]->setText(QString::number(vec_barrier[index].height));
 }
 
-
 void MainWindow::on_pushButton_2_clicked()
 {
-    socket->auto_mode(true);
-    socket->wnd=this;
-    makePack();
+
+    if(socket->auto_send==false)
+    {
+        socket->auto_mode(true);
+        socket->wnd=this;
+        goal_point.x=vec_line_edit[6]->text().toFloat();
+        goal_point.y=vec_line_edit[7]->text().toFloat();
+        makePack();
+    }
+    else
+    {
+        socket->auto_mode(false);
+    }
 }
 
 void MainWindow::on_action_triggered()
@@ -331,7 +340,7 @@ void MainWindow::on_action_triggered()
 
 void MainWindow::recalculateData(Point p)
 {
-    for(unsigned int i=0; i<vec_barrier.size();i++)
+    for(unsigned int i=0; i<vec_buf_barrier.size();i++)
     {
         vec_barrier[i].x=vec_barrier[i].x-p.x;
         vec_barrier[i].y=vec_barrier[i].y-p.y;
@@ -341,7 +350,7 @@ void MainWindow::recalculateData(Point p)
 }
 
 void MainWindow::makePack()
-{
+{        
     QByteArray arr;
     QDataStream dataStream(&arr, QIODevice::WriteOnly);
     dataStream.setFloatingPointPrecision(QDataStream::SinglePrecision);

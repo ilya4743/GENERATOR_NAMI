@@ -5,6 +5,7 @@
 #include <QTcpSocket>
 #include <QAbstractSocket>
 #include <QDebug>
+#include <QTimer>
 #include "mainwindow.h"
 class MainWindow;
 class MyTcpSocket : public QObject
@@ -26,10 +27,11 @@ public slots:
 
 private:
     QTcpSocket *socket;
-    bool auto_send;
 
 public:
     MainWindow* wnd;
+    bool auto_send;
+
     void auto_mode(bool isAuto);
 };
 

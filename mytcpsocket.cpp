@@ -32,56 +32,16 @@ void MyTcpSocket::doConnect()
 void MyTcpSocket::connected()
 {
     qDebug() << "connected...";
-    /*float width=18.1;
-
-    float height=5.1;
-    float step=0.1;
-
-    int num_w=width/step;
-    int num_h=height/step;
-//(num_w)/2+(num_h/2)*(num_w);
-    int center=(num_w)/2+(num_h-1)*(num_w);
-
-    QByteArray arr;
-    QDataStream data(&arr, QIODevice::WriteOnly);
-    //d.setVersion(QDataStream::Qt_5_3);
-
-    data<<float(width)<<float(height)<<float(step);
-    data<<int(center);
-
-    //размеры машины
-    data<<float(0)<<float(0);
-
-    //куда едем
-    data<<float(+9)<<float((2.5));
-    //кол-во препятствий
-    data<<int(0);
-
-    //препятствия
-
-    //data<<float(1.9)<<float(0.75-0.25/2-0.75)<<float(0.6)<<float(0.25+1.3);
-    //data<<float(0.0)<<float(1-0.2)<<float(10)<<float(0.1);
-    //data<<float(0.0)<<float(-1.0)<<float(3)<<float(0.1);
-
-    //data<<float(-0.3)<<float(-0.1)<<float(0)<<float(0);
-    //data<<float(1)<<float(1)<<float(0.21)<<float(0.1);
-
-    //высота покрытия сетки графа
-    socket->write(arr);
-    //socket->flush();*/
-
 }
 
 void MyTcpSocket::disconnected()
 {
     qDebug() << "disconnected...";
-
 }
 
 void MyTcpSocket::bytesWritten(qint64 bytes)
 {
     qDebug() << bytes << " bytes written...";
-
 }
 
 void MyTcpSocket::readyRead()
@@ -102,27 +62,41 @@ void MyTcpSocket::readyRead()
         }
 }
 
+void delay()
+{
+    QTime dieTime= QTime::currentTime().addSecs(1);
+    while (QTime::currentTime() < dieTime)
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+}
+
 void MyTcpSocket::readyRead1()
 {
     QDataStream in(socket);
     in.setFloatingPointPrecision(QDataStream::SinglePrecision);
     in.setByteOrder(QDataStream::LittleEndian);
-    float x,y;
+    float x=-100,y=-100;
     unsigned char b1, b2;
     in>>b1>>b2;
-    int n;
-    in>>n;
-    if(b1==0x44&&b2==0x48&&n>0)
-    {        in>>x>>y;
 
-    wnd->recalculateData(Point (x,y));
-    wnd->makePack();
+    if(b1==0x44&&b2==0x48)
+    {
+        int n;
+        in>>n;
+        in>>x>>y;
+        qDebug()<<x<<y;
+        if(!(x==0&&y==0))
+        {
+            wnd->recalculateData(Point (x,y));
+            wnd->makePack();
+        }
     }
+    socket->readAll();
 }
 
 void MyTcpSocket::auto_mode(bool isAuto)
 {
-    if(isAuto)
+    auto_send=isAuto;
+    if(auto_send)
     {
         disconnect(socket, SIGNAL(readyRead()),this, SLOT(readyRead()));
         connect(socket, SIGNAL(readyRead()),this, SLOT(readyRead1()));
@@ -134,28 +108,10 @@ void MyTcpSocket::auto_mode(bool isAuto)
     }
 }
 
-void delay()
-{
-    QTime dieTime= QTime::currentTime().addSecs(1);
-    while (QTime::currentTime() < dieTime)
-        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-}
+
 void MyTcpSocket::sendData(QByteArray& arr)
 {
-    /*QByteArray arr;
-    QDataStream dataStream(&arr, QIODevice::WriteOnly);
-    dataStream.setFloatingPointPrecision(QDataStream::SinglePrecision);
-    dataStream.setByteOrder(QDataStream::LittleEndian);
-    dataStream<<(unsigned char)0x44<<(unsigned char)0x47;
-
-    for(int i=0; i<3;i++)
-        dataStream<<data[i];
-    dataStream<<int(data[3]);
-
-    for(int i=4; i<data.size()-1; i++)
-    dataStream<<data[data.size()-1];*/
+    delay();
     socket->write(arr);
     socket->flush();
-    //delay();
-
 }
