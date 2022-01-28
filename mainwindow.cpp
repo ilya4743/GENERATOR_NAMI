@@ -45,8 +45,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     }
 
     //подставляем значение параметров в виджеты
-    this->vec_line_edit.reserve(9);
-    this->vec_label.reserve(9);
+    vec_line_edit.reserve(9);
+    vec_label.reserve(9);
     for(unsigned int i=0; i<9; i++)
     {
         this->vec_line_edit.push_back(new QLineEdit());
@@ -72,31 +72,45 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     qComboBox.addItem("По центру справа");
     qComboBox.addItem("По центру сверху");
 
-
     for(unsigned int i=9; i<vec_str_param.size();i++)
     {
-        this->vec_line_edit.push_back(new QLineEdit());
-        this->vec_line_edit[i]->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-        this->vec_line_edit[i]->setText(vec_str_data[i]);
+        vec_line_edit.push_back(new QLineEdit());
+        vec_line_edit[i]->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
+        vec_line_edit[i]->setText(vec_str_data[i]);
 
         //this->vec_line_edit[i]->setValidator(validator);
-        this->vec_label.push_back(new QLabel(vec_str_param[i]));
+        vec_label.push_back(new QLabel(vec_str_param[i]));
         ui->formLayout_4->addWidget(this->vec_label[i]);
         ui->formLayout_4->addRow(this->vec_label[i], this->vec_line_edit[i]);
     }
+
+    vec_check_box.push_back(new QCheckBox("Симуляция движения"));
+    vec_check_box.push_back(new QCheckBox("Зациклить"));
+    vec_check_box.push_back(new QCheckBox("Точка маршрута недостижима"));
+
+    for(unsigned int i=0; i<vec_check_box.size();i++)
+    {
+        ui->formLayout_4->addWidget(this->vec_check_box[i]);
+        ui->formLayout_4->addRow(this->vec_check_box[i]);
+    }
+    vec_check_box[1]->setEnabled(false);
+    vec_check_box[2]->setEnabled(false);
+    connect(vec_check_box[0],SIGNAL(stateChanged(int)),this,SLOT(motionSimulation(int)));
+    connect(vec_check_box[1],SIGNAL(stateChanged(int)),this,SLOT(loopSimulation(int)));
+    connect(vec_check_box[2],SIGNAL(stateChanged(int)),this,SLOT(endlessSimulation(int)));
 
     if(vec_line_edit[8]->text().toInt()==0)
         for(unsigned int i=9; i<vec_str_param.size();i++)
             vec_line_edit[i]->setEnabled(false);
 
-    connect(this->vec_line_edit[8], SIGNAL(textChanged(const QString &)),this, SLOT(textChanged(const QString &)));
-    connect(this->vec_line_edit[9], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier1(const QString &)));
-    connect(this->vec_line_edit[10], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier2(const QString &)));
-    connect(this->vec_line_edit[11], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier3(const QString &)));
-    connect(this->vec_line_edit[12], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier4(const QString &)));
+    connect(vec_line_edit[8], SIGNAL(textChanged(const QString &)),this, SLOT(textChanged(const QString &)));
+    connect(vec_line_edit[9], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier1(const QString &)));
+    connect(vec_line_edit[10], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier2(const QString &)));
+    connect(vec_line_edit[11], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier3(const QString &)));
+    connect(vec_line_edit[12], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier4(const QString &)));
 
     for(int i=0; i<3; i++)
-        connect(this->vec_line_edit[i], SIGNAL(textChanged(const QString &)),this, SLOT(textChanged1(const QString &)));
+        connect(vec_line_edit[i], SIGNAL(textChanged(const QString &)),this, SLOT(textChanged1(const QString &)));
 
     connect(&qComboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(currentIndexCenterChanged(int )));
 
@@ -105,12 +119,48 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     goal_point=(Point(vec_str_data[6].toFloat(),vec_str_data[7].toFloat()));
 }
 
-void MainWindow::data_send(QDataStream &stream)
+void MainWindow::endlessSimulation(int state)
 {
-    float x, y;
-    stream>>x>>y;
-    recalculateData(Point(x,y));
-    this->on_pushButton_clicked();
+    if(state==2)
+    {
+        //vec_check_box[1]->setEnabled(false);
+    }else if(state==0)
+    {
+        //vec_check_box[1]->setEnabled(true);
+    }
+}
+
+void MainWindow::loopSimulation(int state)
+{
+    if(state==2)
+    {
+        //vec_check_box[2]->setEnabled(false);
+    }else if(state==0)
+    {
+        //vec_check_box[2]->setEnabled(true);
+    }
+}
+
+void MainWindow::motionSimulation(int state)
+{
+    if(state==2)
+    {
+        socket->auto_mode(true);
+        socket->wnd=this;
+        //goal_point.x=vec_line_edit[6]->text().toFloat();
+        //goal_point.y=vec_line_edit[7]->text().toFloat();
+        vec_check_box[1]->setEnabled(true);
+        vec_check_box[2]->setEnabled(true);
+
+    }
+    else if(state==0)
+    {
+        socket->auto_mode(false);
+        vec_check_box[1]->setEnabled(false);
+        vec_check_box[1]->setCheckState(Qt::CheckState::Unchecked);
+        vec_check_box[2]->setEnabled(false);
+        vec_check_box[2]->setCheckState(Qt::CheckState::Unchecked);
+    }
 }
 
 void MainWindow::textChanged1(const QString &s)
@@ -120,32 +170,23 @@ void MainWindow::textChanged1(const QString &s)
     height=vec_line_edit[1]->text().toFloat()/vec_line_edit[2]->text().toFloat();
     switch(qComboBox.currentIndex())
     {
-        //case 0:
-       //     vec_line_edit[3]->setEnabled(true);
-        //break;
-
         case 1:
-            //vec_line_edit[3]->setEnabled(false);
             vec_line_edit[3]->setText(QVariant((width / 2) + (height/2)*(width)).toString());
         break;
 
         case 2:
-            //vec_line_edit[3]->setEnabled(false);
             vec_line_edit[3]->setText(QVariant((width / 2) + (height-1)*(width)).toString());
         break;
 
         case 3:
-            //vec_line_edit[3]->setEnabled(false);
             vec_line_edit[3]->setText(QVariant((height/2)*(width)).toString());
         break;
 
         case 4:
-            //vec_line_edit[3]->setEnabled(false);
             vec_line_edit[3]->setText(QVariant((width-1) + (height/2)*(width)).toString());
         break;
 
         case 5:
-            //vec_line_edit[3]->setEnabled(false);
             vec_line_edit[3]->setText(QVariant((width / 2)).toString());
         break;
     }
@@ -185,7 +226,6 @@ void MainWindow::currentIndexCenterChanged(int index)
         case 5:
             vec_line_edit[3]->setEnabled(false);
             vec_line_edit[3]->setText(QVariant((width / 2)).toString());
-
         break;
     }
 }
@@ -239,6 +279,9 @@ MainWindow::~MainWindow()
         delete(*it);
     vec_line_edit.clear();
     delete socket;
+    for(auto it= vec_check_box.begin(); it!=vec_check_box.end(); ++it)
+        delete(*it);
+    vec_check_box.clear();
 }
 
 
@@ -247,57 +290,12 @@ void MainWindow::on_ExitBtn_triggered()
     QApplication::quit();
 }
 
-void MainWindow::on_pushButton_clicked()
-{
-    QByteArray arr;
-    QDataStream dataStream(&arr, QIODevice::WriteOnly);
-    dataStream.setFloatingPointPrecision(QDataStream::SinglePrecision);
-    dataStream.setByteOrder(QDataStream::LittleEndian);
-    dataStream<<(unsigned char)0x44<<(unsigned char)0x47;
-    for(int i=0; i<3; i++)
-        dataStream<<vec_line_edit[i]->text().toFloat();
-
-    dataStream<<vec_line_edit[3]->text().toInt();
-
-    for(int i=4; i<8; i++)
-        dataStream<<vec_line_edit[i]->text().toFloat();
-
-    dataStream<<vec_line_edit[8]->text().toInt();
-
-    for(unsigned int i=0; i<vec_barrier.size();i++)
-        dataStream<<vec_barrier[i].x<<vec_barrier[i].y<<vec_barrier[i].width<<vec_barrier[i].height;
-
-    socket->sendData(arr);
-}
-
-void MainWindow::on_lineEdit_textChanged(const QString &arg1)
-{
-
-}
-
 void MainWindow::on_comboBox_currentIndexChanged(int index)
 {
     vec_line_edit[9] ->setText(QString::number(vec_barrier[index].x));
     vec_line_edit[10]->setText(QString::number(vec_barrier[index].y));
     vec_line_edit[11]->setText(QString::number(vec_barrier[index].width));
     vec_line_edit[12]->setText(QString::number(vec_barrier[index].height));
-}
-
-void MainWindow::on_pushButton_2_clicked()
-{
-
-    if(socket->auto_send==false)
-    {
-        socket->auto_mode(true);
-        socket->wnd=this;
-        goal_point.x=vec_line_edit[6]->text().toFloat();
-        goal_point.y=vec_line_edit[7]->text().toFloat();
-        makePack();
-    }
-    else
-    {
-        socket->auto_mode(false);
-    }
 }
 
 void MainWindow::on_action_triggered()
@@ -338,15 +336,24 @@ void MainWindow::on_action_triggered()
     vec_line_edit[12]->setText(QString::number(vec_barrier[0].height));
 }
 
-void MainWindow::recalculateData(Point p)
+void MainWindow::recalculateBarrier(Point p)
 {
     for(unsigned int i=0; i<vec_buf_barrier.size();i++)
     {
-        vec_barrier[i].x=vec_barrier[i].x-p.x;
-        vec_barrier[i].y=vec_barrier[i].y-p.y;
+        vec_buf_barrier[i].x=vec_buf_barrier[i].x-p.x;
+        vec_buf_barrier[i].y=vec_buf_barrier[i].y-p.y;
     }
-    goal_point.x=goal_point.x-p.x;
-    goal_point.y=goal_point.y-p.y;
+}
+
+void MainWindow::recalculateGoal(Point p)
+{
+    goal_point_buf.x=goal_point_buf.x-p.x;
+    goal_point_buf.y=goal_point_buf.y-p.y;
+}
+
+void MainWindow::recalculateGoalX(float x)
+{
+    goal_point_buf.x=goal_point_buf.x-x;
 }
 
 void MainWindow::makePack()
@@ -364,10 +371,48 @@ void MainWindow::makePack()
     for(int i=4; i<=5; i++)
         dataStream<<vec_line_edit[i]->text().toFloat();
 
-    dataStream<<goal_point.x<<goal_point.y;
+    dataStream<<goal_point_buf.x<<goal_point_buf.y;
     dataStream<<vec_line_edit[8]->text().toInt();
 
-    for(unsigned int i=0; i<vec_barrier.size();i++)
-        dataStream<<vec_barrier[i].x<<vec_barrier[i].y<<vec_barrier[i].width<<vec_barrier[i].height;
+    for(unsigned int i=0; i<vec_buf_barrier.size();i++)
+        dataStream<<vec_buf_barrier[i].x<<vec_buf_barrier[i].y<<vec_buf_barrier[i].width<<vec_buf_barrier[i].height;
     socket->sendData(arr);
 }
+
+void MainWindow::on_sendDataBtn_clicked()
+{
+    //ui->sendDataBtn->setEnabled(false);
+    vec_buf_barrier=vec_barrier;
+    goal_point_buf=goal_point;
+    goal_point.x=vec_line_edit[6]->text().toFloat();
+    goal_point.y=vec_line_edit[7]->text().toFloat();
+    if(socket->auto_send==false)
+    {
+        QByteArray arr;
+        QDataStream dataStream(&arr, QIODevice::WriteOnly);
+        dataStream.setFloatingPointPrecision(QDataStream::SinglePrecision);
+        dataStream.setByteOrder(QDataStream::LittleEndian);
+        dataStream<<(unsigned char)0x44<<(unsigned char)0x47;
+        for(int i=0; i<3; i++)
+            dataStream<<vec_line_edit[i]->text().toFloat();
+
+        dataStream<<vec_line_edit[3]->text().toInt();
+
+        for(int i=4; i<8; i++)
+            dataStream<<vec_line_edit[i]->text().toFloat();
+
+        dataStream<<vec_line_edit[8]->text().toInt();
+
+        for(unsigned int i=0; i<vec_barrier.size();i++)
+            dataStream<<vec_barrier[i].x<<vec_barrier[i].y<<vec_barrier[i].width<<vec_barrier[i].height;
+
+        socket->sendData(arr);
+    }
+    else
+    {
+        if(vec_check_box[1]->checkState()==Qt::CheckState::Checked&&vec_check_box[2]->checkState()==Qt::CheckState::Checked)
+            count_line=40;
+        makePack();
+    }
+}
+

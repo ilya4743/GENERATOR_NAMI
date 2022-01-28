@@ -83,10 +83,34 @@ void MyTcpSocket::readyRead1()
         int n;
         in>>n;
         in>>x>>y;
+        wnd->count_line-y;
         qDebug()<<x<<y;
         if(!(x==0&&y==0))
         {
-            wnd->recalculateData(Point (x,y));
+            if(wnd->vec_check_box[2]->checkState()==Qt::CheckState::Unchecked)
+            {
+                wnd->recalculateBarrier(Point (x,y));
+                wnd->recalculateGoal(Point (x,y));
+            }
+            else if(wnd->vec_check_box[2]->checkState()==Qt::CheckState::Checked)
+
+            {
+                wnd->recalculateBarrier(Point (x,y));
+                wnd->recalculateGoalX(x);
+            }
+                wnd->makePack();
+                if (wnd->vec_check_box[2]->checkState()==Qt::CheckState::Checked&&wnd->count_line-y==0)
+                {
+                wnd->vec_buf_barrier=wnd->vec_barrier;
+                wnd->goal_point_buf=wnd->goal_point;
+                wnd->makePack();
+        }
+        }
+        else if(wnd->vec_check_box[1]->checkState()==Qt::CheckState::Checked)
+        {
+            if (wnd->vec_check_box[2]->checkState()==Qt::CheckState::Checked)
+            wnd->vec_buf_barrier=wnd->vec_barrier;
+            wnd->goal_point_buf=wnd->goal_point;
             wnd->makePack();
         }
     }
@@ -111,6 +135,7 @@ void MyTcpSocket::auto_mode(bool isAuto)
 
 void MyTcpSocket::sendData(QByteArray& arr)
 {
+
     delay();
     socket->write(arr);
     socket->flush();
