@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     vector<QString> vec_str_data;
 
     //читаем наименование параметров
-    QFile file1("/home/NAMI/ila.solomatin/untitled7/param.txt");
+    QFile file1("param.txt");
     if ((file1.exists())&&(file1.open(QIODevice::ReadOnly)))
     {
         QString str="";
@@ -31,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     }
 
     //читаем значение параметров
-    QFile file2("/home/NAMI/ila.solomatin/untitled7/data.txt");
+    QFile file2("data.txt");
     if ((file2.exists())&&(file2.open(QIODevice::ReadOnly)))
     {
         QString str="";

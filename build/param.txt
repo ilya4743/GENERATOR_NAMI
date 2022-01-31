@@ -1,0 +1,13 @@
+width
+height
+step
+center
+width_auto
+height_auto
+x_goal
+y_goal
+n
+x
+y
+width
+heigth
