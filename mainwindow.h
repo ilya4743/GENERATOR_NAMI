@@ -10,6 +10,7 @@
 #include <mytcpserver.h>
 #include "mytcpsocket.h"
 #include"point.h"
+#include <QPushButton>
 
 using namespace std;
 QT_BEGIN_NAMESPACE
@@ -33,10 +34,8 @@ public:
 signals:
     void data_received(QDataStream &stream);
 private slots:
-    void data_send(QDataStream &stream);
 
     void on_ExitBtn_triggered();
-    void on_lineEdit_textChanged(const QString &arg1);
 
     void textChanged(const QString &arg1);
     void textChanged1(const QString &s);
@@ -54,16 +53,17 @@ private slots:
     void loopSimulation(int state);
     void endlessSimulation(int state);
     void on_sendDataBtn_clicked();
-
+    void stopSimulationBtn_click();
 private:
     int ind;
     vector<QLineEdit*> vec_line_edit;
     vector<QLabel*> vec_label;
     MyTcpServer* server;
     MyTcpSocket* socket;
-
     QComboBox qComboBox;
-public:    Ui::MainWindow *ui;
+public:
+    QPushButton *stop_btn;
+    Ui::MainWindow *ui;
     vector<Barrier> vec_barrier;
     vector<Barrier> vec_buf_barrier;
     Point goal_point;
@@ -72,8 +72,10 @@ public:    Ui::MainWindow *ui;
     void recalculateBarrier(Point P);
     void recalculateGoal(Point p);
     void recalculateGoalX(float x);
-    void makePack();    vector<QCheckBox*> vec_check_box;
-
-
+    void makePack();
+    vector<QCheckBox*> vec_check_box;
+    bool isMotionSimulation;
+    bool isLoopSimulation;
+    bool isEndlessSimulation;
 };
 #endif // MAINWINDOW_H

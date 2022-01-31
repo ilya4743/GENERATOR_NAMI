@@ -83,32 +83,36 @@ void MyTcpSocket::readyRead1()
         int n;
         in>>n;
         in>>x>>y;
-        wnd->count_line-y;
         qDebug()<<x<<y;
         if(!(x==0&&y==0))
         {
+            //если конечная точка маршрута не недостижима
             if(wnd->vec_check_box[2]->checkState()==Qt::CheckState::Unchecked)
             {
                 wnd->recalculateBarrier(Point (x,y));
                 wnd->recalculateGoal(Point (x,y));
             }
+            //если конечная точка маршрута недостижима
             else if(wnd->vec_check_box[2]->checkState()==Qt::CheckState::Checked)
-
             {
                 wnd->recalculateBarrier(Point (x,y));
                 wnd->recalculateGoalX(x);
-            }
-                wnd->makePack();
-                if (wnd->vec_check_box[2]->checkState()==Qt::CheckState::Checked&&wnd->count_line-y==0)
+                //wnd->recalculateGoal(Point (x,y));
+
+                wnd->count_line=wnd->count_line-y;
+                //если зациклено, нужно ли переводить на новую итерацию
+                if (wnd->vec_check_box[1]->checkState()==Qt::CheckState::Checked&&wnd->count_line==0)
                 {
-                wnd->vec_buf_barrier=wnd->vec_barrier;
-                wnd->goal_point_buf=wnd->goal_point;
-                wnd->makePack();
+                    wnd->vec_buf_barrier=wnd->vec_barrier;
+                    wnd->goal_point_buf=wnd->goal_point;
+                    wnd->count_line=40;
+                }
+            }
+            wnd->makePack();
         }
-        }
+        //на новую итерацию, если достигли конца маршрута при симуляции
         else if(wnd->vec_check_box[1]->checkState()==Qt::CheckState::Checked)
         {
-            if (wnd->vec_check_box[2]->checkState()==Qt::CheckState::Checked)
             wnd->vec_buf_barrier=wnd->vec_barrier;
             wnd->goal_point_buf=wnd->goal_point;
             wnd->makePack();

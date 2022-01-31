@@ -103,6 +103,11 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
         for(unsigned int i=9; i<vec_str_param.size();i++)
             vec_line_edit[i]->setEnabled(false);
 
+    stop_btn=new QPushButton("Остановить симуляцию",this);
+    connect(stop_btn,SIGNAL(clicked()),this, SLOT(stopSimulationBtn_click()));
+    stop_btn->setEnabled(false);
+    ui->formLayout_4->addRow(stop_btn);
+
     connect(vec_line_edit[8], SIGNAL(textChanged(const QString &)),this, SLOT(textChanged(const QString &)));
     connect(vec_line_edit[9], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier1(const QString &)));
     connect(vec_line_edit[10], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier2(const QString &)));
@@ -114,48 +119,47 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 
     connect(&qComboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(currentIndexCenterChanged(int )));
 
-    connect(socket, SIGNAL(data_received(QDataStream &)),this,SLOT(data_send(QDataStream &)));
+    //goal_point=(Point(vec_str_data[6].toFloat(),vec_str_data[7].toFloat()));
+}
 
-    goal_point=(Point(vec_str_data[6].toFloat(),vec_str_data[7].toFloat()));
+void MainWindow::stopSimulationBtn_click()
+{
+    stop_btn->setEnabled(false);
+    socket->auto_mode(false);
+    ui->sendDataBtn->setEnabled(true);
 }
 
 void MainWindow::endlessSimulation(int state)
 {
     if(state==2)
-    {
-        //vec_check_box[1]->setEnabled(false);
-    }else if(state==0)
-    {
-        //vec_check_box[1]->setEnabled(true);
-    }
+        isEndlessSimulation=true;
+    else if(state==0)
+        isEndlessSimulation=false;
 }
 
 void MainWindow::loopSimulation(int state)
 {
     if(state==2)
-    {
-        //vec_check_box[2]->setEnabled(false);
-    }else if(state==0)
-    {
-        //vec_check_box[2]->setEnabled(true);
-    }
+        isLoopSimulation=true;
+    else if(state==0)
+        isLoopSimulation=false;
 }
 
 void MainWindow::motionSimulation(int state)
 {
     if(state==2)
     {
-        socket->auto_mode(true);
+        isMotionSimulation=true;
+        //socket->auto_mode(true);
         socket->wnd=this;
-        //goal_point.x=vec_line_edit[6]->text().toFloat();
-        //goal_point.y=vec_line_edit[7]->text().toFloat();
         vec_check_box[1]->setEnabled(true);
         vec_check_box[2]->setEnabled(true);
 
     }
     else if(state==0)
     {
-        socket->auto_mode(false);
+        isMotionSimulation=false;
+        //socket->auto_mode(false);
         vec_check_box[1]->setEnabled(false);
         vec_check_box[1]->setCheckState(Qt::CheckState::Unchecked);
         vec_check_box[2]->setEnabled(false);
@@ -282,6 +286,7 @@ MainWindow::~MainWindow()
     for(auto it= vec_check_box.begin(); it!=vec_check_box.end(); ++it)
         delete(*it);
     vec_check_box.clear();
+    delete stop_btn;
 }
 
 
@@ -381,12 +386,12 @@ void MainWindow::makePack()
 
 void MainWindow::on_sendDataBtn_clicked()
 {
-    //ui->sendDataBtn->setEnabled(false);
-    vec_buf_barrier=vec_barrier;
-    goal_point_buf=goal_point;
     goal_point.x=vec_line_edit[6]->text().toFloat();
     goal_point.y=vec_line_edit[7]->text().toFloat();
-    if(socket->auto_send==false)
+    vec_buf_barrier=vec_barrier;
+    goal_point_buf=goal_point;
+    socket->auto_mode(isMotionSimulation);
+    if(!isMotionSimulation)
     {
         QByteArray arr;
         QDataStream dataStream(&arr, QIODevice::WriteOnly);
@@ -410,9 +415,13 @@ void MainWindow::on_sendDataBtn_clicked()
     }
     else
     {
+        if(vec_check_box[1]->checkState()==Qt::CheckState::Checked||vec_check_box[2]->checkState()==Qt::CheckState::Checked)
+        {
+            stop_btn->setEnabled(true);
+            ui->sendDataBtn->setEnabled(false);
+        }
         if(vec_check_box[1]->checkState()==Qt::CheckState::Checked&&vec_check_box[2]->checkState()==Qt::CheckState::Checked)
             count_line=40;
         makePack();
     }
 }
-
