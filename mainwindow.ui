@@ -86,6 +86,7 @@
     <property name="title">
      <string>Программа</string>
     </property>
+    <addaction name="SettingsBtn"/>
     <addaction name="ExitBtn"/>
    </widget>
    <widget class="QMenu" name="menu_2">
@@ -112,6 +113,11 @@
   <action name="action">
    <property name="text">
     <string>Загрузить последовательность из файла</string>
+   </property>
+  </action>
+  <action name="SettingsBtn">
+   <property name="text">
+    <string>Настройки</string>
    </property>
   </action>
  </widget>

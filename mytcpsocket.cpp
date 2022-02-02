@@ -62,9 +62,9 @@ void MyTcpSocket::readyRead()
         }
 }
 
-void delay()
+void delay(const int ms)
 {
-    QTime dieTime= QTime::currentTime().addSecs(1);
+    QTime dieTime= QTime::currentTime().addMSecs(ms);
     while (QTime::currentTime() < dieTime)
         QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 }
@@ -86,7 +86,7 @@ void MyTcpSocket::readyRead1()
         qDebug()<<x<<y;
         if(!(x==0&&y==0))
         {
-            //если конечная точка маршрута не недостижима
+            //если конечная точка маршрута достижима
             if(wnd->vec_check_box[2]->checkState()==Qt::CheckState::Unchecked)
             {
                 wnd->recalculateBarrier(Point (x,y));
@@ -108,18 +108,23 @@ void MyTcpSocket::readyRead1()
                     wnd->count_line=40;
                 }
             }
-            wnd->makePack();
+            //если ожидаем БПР
+            if(wnd->isWaitBPR)
+                wnd->makePack();
         }
         //на новую итерацию, если достигли конца маршрута при симуляции
         else if(wnd->vec_check_box[1]->checkState()==Qt::CheckState::Checked)
         {
             wnd->vec_buf_barrier=wnd->vec_barrier;
             wnd->goal_point_buf=wnd->goal_point;
-            wnd->makePack();
+            //если ожидаем БПР
+            if(wnd->isWaitBPR)
+                wnd->makePack();
         }
     }
     socket->readAll();
 }
+
 
 void MyTcpSocket::auto_mode(bool isAuto)
 {
@@ -140,7 +145,7 @@ void MyTcpSocket::auto_mode(bool isAuto)
 void MyTcpSocket::sendData(QByteArray& arr)
 {
 
-    delay();
+    delay(delay_time);
     socket->write(arr);
     socket->flush();
 }

@@ -11,10 +11,12 @@
 #include "mytcpsocket.h"
 #include"point.h"
 #include <QPushButton>
+#include"settings.h"
 
 using namespace std;
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
+class Settings;
 QT_END_NAMESPACE
 struct Barrier
 {
@@ -52,8 +54,11 @@ private slots:
     void motionSimulation(int state);
     void loopSimulation(int state);
     void endlessSimulation(int state);
+    void waitBPR(int state);
     void on_sendDataBtn_clicked();
     void stopSimulationBtn_click();
+    void on_SettingsBtn_triggered();
+
 private:
     int ind;
     vector<QLineEdit*> vec_line_edit;
@@ -61,6 +66,7 @@ private:
     MyTcpServer* server;
     MyTcpSocket* socket;
     QComboBox qComboBox;
+    Settings *settings_wnd;
 public:
     QPushButton *stop_btn;
     Ui::MainWindow *ui;
@@ -77,5 +83,7 @@ public:
     bool isMotionSimulation;
     bool isLoopSimulation;
     bool isEndlessSimulation;
+    bool isWaitBPR;
+    bool stopSimulation;
 };
 #endif // MAINWINDOW_H

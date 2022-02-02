@@ -27,11 +27,12 @@ public slots:
 
 private:
     QTcpSocket *socket;
-
+    int delay_time;
 public:
     MainWindow* wnd;
     bool auto_send;
-
+    int GetDelay_time(){return delay_time;}
+    void SetDelay_time(int delay_time){this->delay_time=delay_time;}
     void auto_mode(bool isAuto);
 };
 

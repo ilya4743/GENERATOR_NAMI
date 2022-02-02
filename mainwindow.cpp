@@ -87,7 +87,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     vec_check_box.push_back(new QCheckBox("Симуляция движения"));
     vec_check_box.push_back(new QCheckBox("Зациклить"));
     vec_check_box.push_back(new QCheckBox("Точка маршрута недостижима"));
-
+    vec_check_box.push_back(new QCheckBox("Ожидать ответа БПР"));
+    vec_check_box[3]->setCheckState(Qt::CheckState::Checked);
+    isWaitBPR=true;
     for(unsigned int i=0; i<vec_check_box.size();i++)
     {
         ui->formLayout_4->addWidget(this->vec_check_box[i]);
@@ -95,13 +97,23 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     }
     vec_check_box[1]->setEnabled(false);
     vec_check_box[2]->setEnabled(false);
+    vec_check_box[3]->setEnabled(false);
     connect(vec_check_box[0],SIGNAL(stateChanged(int)),this,SLOT(motionSimulation(int)));
     connect(vec_check_box[1],SIGNAL(stateChanged(int)),this,SLOT(loopSimulation(int)));
     connect(vec_check_box[2],SIGNAL(stateChanged(int)),this,SLOT(endlessSimulation(int)));
+    connect(vec_check_box[3],SIGNAL(stateChanged(int)),this,SLOT(waitBPR(int)));
 
     if(vec_line_edit[8]->text().toInt()==0)
         for(unsigned int i=9; i<vec_str_param.size();i++)
             vec_line_edit[i]->setEnabled(false);
+
+    vec_line_edit.push_back(new QLineEdit());
+    vec_line_edit[vec_line_edit.size()-1]->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
+    vec_line_edit[vec_line_edit.size()-1]->setEnabled(false);
+    vec_line_edit[vec_line_edit.size()-1]->setText("1000");
+    vec_label.push_back(new QLabel("Задержка мсек"));
+    vec_label[vec_label.size()-1]->setEnabled(false);
+    ui->formLayout_4->addRow(vec_label[vec_label.size()-1],vec_line_edit[vec_line_edit.size()-1]);
 
     stop_btn=new QPushButton("Остановить симуляцию",this);
     connect(stop_btn,SIGNAL(clicked()),this, SLOT(stopSimulationBtn_click()));
@@ -122,11 +134,20 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     //goal_point=(Point(vec_str_data[6].toFloat(),vec_str_data[7].toFloat()));
 }
 
+void MainWindow::waitBPR(int state)
+{
+    if(state==2)
+        isWaitBPR=true;
+    else if(state==0)
+        isWaitBPR=false;
+}
+
 void MainWindow::stopSimulationBtn_click()
 {
     stop_btn->setEnabled(false);
     socket->auto_mode(false);
     ui->sendDataBtn->setEnabled(true);
+    stopSimulation=true;
 }
 
 void MainWindow::endlessSimulation(int state)
@@ -135,6 +156,7 @@ void MainWindow::endlessSimulation(int state)
         isEndlessSimulation=true;
     else if(state==0)
         isEndlessSimulation=false;
+    vec_check_box[3]->setEnabled(true);
 }
 
 void MainWindow::loopSimulation(int state)
@@ -154,7 +176,9 @@ void MainWindow::motionSimulation(int state)
         socket->wnd=this;
         vec_check_box[1]->setEnabled(true);
         vec_check_box[2]->setEnabled(true);
-
+        vec_check_box[3]->setEnabled(true);
+        vec_line_edit[vec_line_edit.size()-1]->setEnabled(true);
+        vec_label[vec_label.size()-1]->setEnabled(true);
     }
     else if(state==0)
     {
@@ -164,6 +188,9 @@ void MainWindow::motionSimulation(int state)
         vec_check_box[1]->setCheckState(Qt::CheckState::Unchecked);
         vec_check_box[2]->setEnabled(false);
         vec_check_box[2]->setCheckState(Qt::CheckState::Unchecked);
+        vec_check_box[3]->setEnabled(false);
+        vec_line_edit[vec_line_edit.size()-1]->setEnabled(false);
+        vec_label[vec_label.size()-1]->setEnabled(false);
     }
 }
 
@@ -287,6 +314,8 @@ MainWindow::~MainWindow()
         delete(*it);
     vec_check_box.clear();
     delete stop_btn;
+    if (settings_wnd!=NULL)
+        delete settings_wnd;
 }
 
 
@@ -391,6 +420,7 @@ void MainWindow::on_sendDataBtn_clicked()
     vec_buf_barrier=vec_barrier;
     goal_point_buf=goal_point;
     socket->auto_mode(isMotionSimulation);
+    //если нет симуляции движения
     if(!isMotionSimulation)
     {
         QByteArray arr;
@@ -413,15 +443,43 @@ void MainWindow::on_sendDataBtn_clicked()
 
         socket->sendData(arr);
     }
+    //если есть симуляция движения
     else
     {
-        if(vec_check_box[1]->checkState()==Qt::CheckState::Checked||vec_check_box[2]->checkState()==Qt::CheckState::Checked)
+        socket->SetDelay_time(vec_line_edit[vec_line_edit.size()-1]->text().toInt());
+        //если не ожидаем БПР
+        if(!isWaitBPR)
         {
             stop_btn->setEnabled(true);
             ui->sendDataBtn->setEnabled(false);
+            while(!stopSimulation)
+            {
+                makePack();
+            }
+
         }
-        if(vec_check_box[1]->checkState()==Qt::CheckState::Checked&&vec_check_box[2]->checkState()==Qt::CheckState::Checked)
-            count_line=40;
-        makePack();
+        else
+        {
+            //если движение зациклено или точка маршрута недостижима
+            if(vec_check_box[1]->checkState()==Qt::CheckState::Checked||vec_check_box[2]->checkState()==Qt::CheckState::Checked)
+            {
+                stop_btn->setEnabled(true);
+                ui->sendDataBtn->setEnabled(false);
+            }
+            //если движение зациклено и точка маршрута недостижима
+            if(vec_check_box[1]->checkState()==Qt::CheckState::Checked&&vec_check_box[2]->checkState()==Qt::CheckState::Checked)
+                count_line=40;
+            makePack();
+        }
     }
 }
+#include "dialog.h"
+
+void MainWindow::on_SettingsBtn_triggered()
+{
+    //settings_wnd=new Settings();
+    //settings_wnd->show();
+    Dialog *d=new Dialog();
+    d->show();
+}
+

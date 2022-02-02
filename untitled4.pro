@@ -8,11 +8,13 @@ CONFIG -= app_bundle
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+        dialog.cpp \
         main.cpp \
         mainwindow.cpp \
         mytcpserver.cpp \
         mytcpsocket.cpp \
-        point.cpp
+        point.cpp \
+        settings.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -20,13 +22,17 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    dialog.h \
     mainwindow.h \
     mytcpserver.h \
     mytcpsocket.h \
-    point.h
+    point.h \
+    settings.h
 
 FORMS += \
-    mainwindow.ui
+    dialog.ui \
+    mainwindow.ui \
+    settings.ui
 
 QT       += core gui
 
