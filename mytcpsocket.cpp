@@ -6,6 +6,7 @@
 
 MyTcpSocket::MyTcpSocket(QObject *parent) : QObject(parent)
 {
+    delay_time=1000;
 }
 
 void MyTcpSocket::doConnect()
@@ -15,7 +16,7 @@ void MyTcpSocket::doConnect()
     connect(socket, SIGNAL(connected()),this, SLOT(connected()));
     connect(socket, SIGNAL(disconnected()),this, SLOT(disconnected()));
     connect(socket, SIGNAL(bytesWritten(qint64)),this, SLOT(bytesWritten(qint64)));
-    connect(socket, SIGNAL(readyRead()),this, SLOT(readyRead()));
+    connect(socket, SIGNAL(readyRead()),this, SLOT(readyReadNoSimulation()));
 
     qDebug() << "connecting...";
 
@@ -44,7 +45,7 @@ void MyTcpSocket::bytesWritten(qint64 bytes)
     qDebug() << bytes << " bytes written...";
 }
 
-void MyTcpSocket::readyRead()
+void MyTcpSocket::readyReadNoSimulation()
 {
     QDataStream in(socket);
     in.setFloatingPointPrecision(QDataStream::SinglePrecision);
@@ -69,9 +70,75 @@ void delay(const int ms)
         QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 }
 
-void MyTcpSocket::readyRead1()
+void MyTcpSocket::readyReadEndlessSimulation()
 {
     QDataStream in(socket);
+    in.setFloatingPointPrecision(QDataStream::SinglePrecision);
+    in.setByteOrder(QDataStream::LittleEndian);
+    float x=-100,y=-100;
+    unsigned char b1, b2;
+    in>>b1>>b2;
+
+    if(b1==0x44&&b2==0x48)
+    {
+        int n;
+        in>>n;
+        in>>x>>y;
+        qDebug()<<x<<y;
+        wnd->recalculateBarrier(Point (x,y));
+        wnd->recalculateGoalX(x);
+        wnd->count_line=wnd->count_line-y;
+        //если зациклено, нужно ли переводить на новую итерацию
+        if (wnd->isLoopSimulation&&wnd->count_line==0)
+        {
+            wnd->vec_buf_barrier=wnd->vec_barrier;
+            wnd->goal_point_buf=wnd->goal_point;
+            wnd->count_line=40;
+        }
+        if(wnd->isWaitBPR)
+            wnd->makePack();
+    }
+    socket->readAll();
+}
+
+void MyTcpSocket::readyReadSimpleSimulation()
+{
+    QDataStream in(socket);
+    in.setFloatingPointPrecision(QDataStream::SinglePrecision);
+    in.setByteOrder(QDataStream::LittleEndian);
+    float x=-100,y=-100;
+    unsigned char b1, b2;
+    in>>b1>>b2;
+
+    if(b1==0x44&&b2==0x48)
+    {
+        int n;
+        in>>n;
+        in>>x>>y;
+        qDebug()<<x<<y;
+        if(!(x==0&&y==0))
+        {
+            wnd->recalculateBarrier(Point (x,y));
+            wnd->recalculateGoal(Point (x,y));
+            if(wnd->isWaitBPR)
+                wnd->makePack();
+        }
+        //если зациклено, нужно ли переводить на новую итерацию
+        else if(wnd->isLoopSimulation)
+        {
+            wnd->vec_buf_barrier=wnd->vec_barrier;
+            wnd->goal_point_buf=wnd->goal_point;
+            if(wnd->isWaitBPR)
+                wnd->makePack();
+        }
+
+    }
+    socket->readAll();
+}
+
+void MyTcpSocket::readyRead1()
+{
+    /*QDataStream in(socket);
     in.setFloatingPointPrecision(QDataStream::SinglePrecision);
     in.setByteOrder(QDataStream::LittleEndian);
     float x=-100,y=-100;
@@ -122,29 +189,33 @@ void MyTcpSocket::readyRead1()
                 wnd->makePack();
         }
     }
-    socket->readAll();
+    socket->readAll();*/
 }
 
-
+//void readyReadSimpleSimulation();
+//void readyReadEndlessSimulation();
+//void readyReadNoSimulation();
 void MyTcpSocket::auto_mode(bool isAuto)
 {
     auto_send=isAuto;
     if(auto_send)
     {
-        disconnect(socket, SIGNAL(readyRead()),this, SLOT(readyRead()));
-        connect(socket, SIGNAL(readyRead()),this, SLOT(readyRead1()));
+        //disconnect(socket, SIGNAL(readyRead()),this, SLOT(readyReadEndlessSimulation()));
+        //connect(socket, SIGNAL(readyRead()),this, SLOT(readyReadSimpleSimulation()));
+        //disconnect(socket, SIGNAL(readyRead()),this, SLOT(readyReadNoSimulation()));
     }
     else
     {
-        disconnect(socket, SIGNAL(readyRead()),this, SLOT(readyRead1()));
-        connect(socket, SIGNAL(readyRead()),this, SLOT(readyRead()));
+        //disconnect(socket, SIGNAL(readyRead()),this, SLOT(readyReadEndlessSimulation()));
+        //disconnect(socket, SIGNAL(readyRead()),this, SLOT(readyReadSimpleSimulation()));
+        //connect(socket, SIGNAL(readyRead()),this, SLOT(readyReadNoSimulation()));
     }
 }
 
 
 void MyTcpSocket::sendData(QByteArray& arr)
 {
-
+    //if(wnd->isMotionSimulation)
     delay(delay_time);
     socket->write(arr);
     socket->flush();

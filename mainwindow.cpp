@@ -131,7 +131,11 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 
     connect(&qComboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(currentIndexCenterChanged(int )));
 
-    //goal_point=(Point(vec_str_data[6].toFloat(),vec_str_data[7].toFloat()));
+    isMotionSimulation=false;
+    isLoopSimulation=false;
+    isEndlessSimulation=false;
+    isWaitBPR=true;
+    stopSimulation=false;
 }
 
 void MainWindow::waitBPR(int state)
@@ -145,7 +149,10 @@ void MainWindow::waitBPR(int state)
 void MainWindow::stopSimulationBtn_click()
 {
     stop_btn->setEnabled(false);
-    socket->auto_mode(false);
+    //socket->auto_mode(false);
+    disconnect(socket->GetQTcpSocket(), SIGNAL(readyRead()),socket, SLOT(readyReadEndlessSimulation()));
+    connect(socket->GetQTcpSocket(), SIGNAL(readyRead()),socket, SLOT(readyReadNoSimulation()));
+    disconnect(socket->GetQTcpSocket(), SIGNAL(readyRead()),socket, SLOT(readyReadSimpleSimulation()));
     ui->sendDataBtn->setEnabled(true);
     stopSimulation=true;
 }
@@ -153,9 +160,17 @@ void MainWindow::stopSimulationBtn_click()
 void MainWindow::endlessSimulation(int state)
 {
     if(state==2)
+    {
         isEndlessSimulation=true;
+        disconnect(socket->GetQTcpSocket(), SIGNAL(readyRead()),socket, SLOT(readyReadSimpleSimulation()));
+        connect(socket->GetQTcpSocket(), SIGNAL(readyRead()),socket, SLOT(readyReadEndlessSimulation()));
+    }
     else if(state==0)
+    {
         isEndlessSimulation=false;
+        disconnect(socket->GetQTcpSocket(), SIGNAL(readyRead()),socket, SLOT(readyReadEndlessSimulation()));
+        connect(socket->GetQTcpSocket(), SIGNAL(readyRead()),socket, SLOT(readyReadSimpleSimulation()));
+    }
     vec_check_box[3]->setEnabled(true);
 }
 
@@ -179,6 +194,11 @@ void MainWindow::motionSimulation(int state)
         vec_check_box[3]->setEnabled(true);
         vec_line_edit[vec_line_edit.size()-1]->setEnabled(true);
         vec_label[vec_label.size()-1]->setEnabled(true);
+
+        disconnect(socket->GetQTcpSocket(), SIGNAL(readyRead()),socket, SLOT(readyReadNoSimulation()));
+        connect(socket->GetQTcpSocket(), SIGNAL(readyRead()),socket, SLOT(readyReadSimpleSimulation()));
+
+
     }
     else if(state==0)
     {
@@ -191,6 +211,8 @@ void MainWindow::motionSimulation(int state)
         vec_check_box[3]->setEnabled(false);
         vec_line_edit[vec_line_edit.size()-1]->setEnabled(false);
         vec_label[vec_label.size()-1]->setEnabled(false);
+        disconnect(socket->GetQTcpSocket(), SIGNAL(readyRead()),socket, SLOT(readyReadSimpleSimulation()));
+        connect(socket->GetQTcpSocket(), SIGNAL(readyRead()),socket, SLOT(readyReadNoSimulation()));
     }
 }
 
@@ -446,6 +468,13 @@ void MainWindow::on_sendDataBtn_clicked()
     //если есть симуляция движения
     else
     {
+        disconnect(socket->GetQTcpSocket(),SIGNAL(readyRead()),socket,SLOT(readyReadNoSimulation()));
+        connect(socket->GetQTcpSocket(),SIGNAL(readyRead()),socket,SLOT(readyReadSimpleSimulation()));
+        if(isEndlessSimulation==true)
+        {
+            disconnect(socket->GetQTcpSocket(),SIGNAL(readyRead()),socket,SLOT(readyReadSimpleSimulation()));
+            connect(socket->GetQTcpSocket(),SIGNAL(readyRead()),socket,SLOT(readyReadEndlessSimulation()));
+        }
         socket->SetDelay_time(vec_line_edit[vec_line_edit.size()-1]->text().toInt());
         //если не ожидаем БПР
         if(!isWaitBPR)
@@ -461,13 +490,13 @@ void MainWindow::on_sendDataBtn_clicked()
         else
         {
             //если движение зациклено или точка маршрута недостижима
-            if(vec_check_box[1]->checkState()==Qt::CheckState::Checked||vec_check_box[2]->checkState()==Qt::CheckState::Checked)
+            if(isLoopSimulation||isEndlessSimulation)
             {
                 stop_btn->setEnabled(true);
                 ui->sendDataBtn->setEnabled(false);
             }
             //если движение зациклено и точка маршрута недостижима
-            if(vec_check_box[1]->checkState()==Qt::CheckState::Checked&&vec_check_box[2]->checkState()==Qt::CheckState::Checked)
+            if(isLoopSimulation&&isEndlessSimulation)
                 count_line=40;
             makePack();
         }

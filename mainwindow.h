@@ -67,6 +67,8 @@ private:
     MyTcpSocket* socket;
     QComboBox qComboBox;
     Settings *settings_wnd;
+    vector<QCheckBox*> vec_check_box;
+
 public:
     QPushButton *stop_btn;
     Ui::MainWindow *ui;
@@ -79,7 +81,6 @@ public:
     void recalculateGoal(Point p);
     void recalculateGoalX(float x);
     void makePack();
-    vector<QCheckBox*> vec_check_box;
     bool isMotionSimulation;
     bool isLoopSimulation;
     bool isEndlessSimulation;
