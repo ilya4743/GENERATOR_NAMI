@@ -441,7 +441,10 @@ void MainWindow::on_sendDataBtn_clicked()
     goal_point.y=vec_line_edit[7]->text().toFloat();
     vec_buf_barrier=vec_barrier;
     goal_point_buf=goal_point;
+    stopSimulation=false;
+    count_line=40;
     socket->auto_mode(isMotionSimulation);
+    socket->wnd=this;
     //если нет симуляции движения
     if(!isMotionSimulation)
     {
@@ -496,8 +499,8 @@ void MainWindow::on_sendDataBtn_clicked()
                 ui->sendDataBtn->setEnabled(false);
             }
             //если движение зациклено и точка маршрута недостижима
-            if(isLoopSimulation&&isEndlessSimulation)
-                count_line=40;
+            //if(isLoopSimulation&&isEndlessSimulation)
+            //    count_line=40;
             makePack();
         }
     }

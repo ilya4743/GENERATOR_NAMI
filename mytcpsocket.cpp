@@ -96,7 +96,10 @@ void MyTcpSocket::readyReadEndlessSimulation()
             wnd->count_line=40;
         }
         if(wnd->isWaitBPR)
+        {
+            delay(delay_time);
             wnd->makePack();
+        }
     }
     socket->readAll();
 }
@@ -121,7 +124,10 @@ void MyTcpSocket::readyReadSimpleSimulation()
             wnd->recalculateBarrier(Point (x,y));
             wnd->recalculateGoal(Point (x,y));
             if(wnd->isWaitBPR)
+            {
+                delay(delay_time);
                 wnd->makePack();
+            }
         }
         //если зациклено, нужно ли переводить на новую итерацию
         else if(wnd->isLoopSimulation)
@@ -129,94 +135,28 @@ void MyTcpSocket::readyReadSimpleSimulation()
             wnd->vec_buf_barrier=wnd->vec_barrier;
             wnd->goal_point_buf=wnd->goal_point;
             if(wnd->isWaitBPR)
+            {
+                delay(delay_time);
                 wnd->makePack();
+            }
         }
 
     }
     socket->readAll();
 }
 
-void MyTcpSocket::readyRead1()
-{
-    /*QDataStream in(socket);
-    in.setFloatingPointPrecision(QDataStream::SinglePrecision);
-    in.setByteOrder(QDataStream::LittleEndian);
-    float x=-100,y=-100;
-    unsigned char b1, b2;
-    in>>b1>>b2;
-
-    if(b1==0x44&&b2==0x48)
-    {
-        int n;
-        in>>n;
-        in>>x>>y;
-        qDebug()<<x<<y;
-        if(!(x==0&&y==0))
-        {
-            //если конечная точка маршрута достижима
-            if(wnd->vec_check_box[2]->checkState()==Qt::CheckState::Unchecked)
-            {
-                wnd->recalculateBarrier(Point (x,y));
-                wnd->recalculateGoal(Point (x,y));
-            }
-            //если конечная точка маршрута недостижима
-            else if(wnd->vec_check_box[2]->checkState()==Qt::CheckState::Checked)
-            {
-                wnd->recalculateBarrier(Point (x,y));
-                wnd->recalculateGoalX(x);
-                //wnd->recalculateGoal(Point (x,y));
-
-                wnd->count_line=wnd->count_line-y;
-                //если зациклено, нужно ли переводить на новую итерацию
-                if (wnd->vec_check_box[1]->checkState()==Qt::CheckState::Checked&&wnd->count_line==0)
-                {
-                    wnd->vec_buf_barrier=wnd->vec_barrier;
-                    wnd->goal_point_buf=wnd->goal_point;
-                    wnd->count_line=40;
-                }
-            }
-            //если ожидаем БПР
-            if(wnd->isWaitBPR)
-                wnd->makePack();
-        }
-        //на новую итерацию, если достигли конца маршрута при симуляции
-        else if(wnd->vec_check_box[1]->checkState()==Qt::CheckState::Checked)
-        {
-            wnd->vec_buf_barrier=wnd->vec_barrier;
-            wnd->goal_point_buf=wnd->goal_point;
-            //если ожидаем БПР
-            if(wnd->isWaitBPR)
-                wnd->makePack();
-        }
-    }
-    socket->readAll();*/
-}
-
-//void readyReadSimpleSimulation();
-//void readyReadEndlessSimulation();
-//void readyReadNoSimulation();
 void MyTcpSocket::auto_mode(bool isAuto)
 {
     auto_send=isAuto;
-    if(auto_send)
-    {
-        //disconnect(socket, SIGNAL(readyRead()),this, SLOT(readyReadEndlessSimulation()));
-        //connect(socket, SIGNAL(readyRead()),this, SLOT(readyReadSimpleSimulation()));
-        //disconnect(socket, SIGNAL(readyRead()),this, SLOT(readyReadNoSimulation()));
-    }
-    else
-    {
-        //disconnect(socket, SIGNAL(readyRead()),this, SLOT(readyReadEndlessSimulation()));
-        //disconnect(socket, SIGNAL(readyRead()),this, SLOT(readyReadSimpleSimulation()));
-        //connect(socket, SIGNAL(readyRead()),this, SLOT(readyReadNoSimulation()));
-    }
 }
-
 
 void MyTcpSocket::sendData(QByteArray& arr)
 {
     //if(wnd->isMotionSimulation)
-    delay(delay_time);
     socket->write(arr);
     socket->flush();
+    QString str=QTime::currentTime().toString("HH:mm:ss");
+    qDebug()<<str;
+    if(!wnd->isWaitBPR)
+        delay(delay_time);
 }

@@ -22,7 +22,6 @@ public slots:
     void connected();
     void disconnected();
     void bytesWritten(qint64 bytes);
-    void readyRead1();
     void readyReadSimpleSimulation();
     void readyReadEndlessSimulation();
     void readyReadNoSimulation();
@@ -36,10 +35,7 @@ public:
     int GetDelay_time(){return delay_time;}
     void SetDelay_time(int delay_time){this->delay_time=delay_time;}
     void auto_mode(bool isAuto);
-    QTcpSocket* GetQTcpSocket()
-    {
-        return socket;
-    }
+    QTcpSocket* GetQTcpSocket(){return socket;}
 };
 
 #endif // MYTCPSOCKET_H
