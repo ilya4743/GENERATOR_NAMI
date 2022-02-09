@@ -42,7 +42,7 @@ void MyTcpSocket::disconnected()
 
 void MyTcpSocket::bytesWritten(qint64 bytes)
 {
-    qDebug() << bytes << " bytes written...";
+    //qDebug() << bytes << " bytes written...";
 }
 
 void MyTcpSocket::readyReadNoSimulation()
@@ -59,7 +59,7 @@ void MyTcpSocket::readyReadNoSimulation()
         while(socket->bytesAvailable())
         {
             in>>x>>y;
-            qDebug()<<x<<'\t'<<y;
+            //qDebug()<<x<<'\t'<<y;
         }
 }
 
@@ -84,22 +84,24 @@ void MyTcpSocket::readyReadEndlessSimulation()
         int n;
         in>>n;
         in>>x>>y;
-        qDebug()<<x<<y;
+        //qDebug()<<x<<y;
         wnd->recalculateBarrier(Point (x,y));
         wnd->recalculateGoalX(x);
-        wnd->count_line=wnd->count_line-y;
+        wnd->count_line_buf=wnd->count_line_buf-y;
         //если зациклено, нужно ли переводить на новую итерацию
-        if (wnd->isLoopSimulation&&wnd->count_line==0)
+        if (wnd->isLoopSimulation&&wnd->count_line_buf==0)
         {
             wnd->vec_buf_barrier=wnd->vec_barrier;
             wnd->goal_point_buf=wnd->goal_point;
-            wnd->count_line=40;
+            wnd->count_line_buf=wnd->count_line;
         }
         if(wnd->isWaitBPR)
         {
             delay(delay_time);
             wnd->makePack();
         }
+        else
+            wnd->countReceivePack++;
     }
     socket->readAll();
 }
@@ -115,10 +117,11 @@ void MyTcpSocket::readyReadSimpleSimulation()
 
     if(b1==0x44&&b2==0x48)
     {
+        wnd->countReceivePack++;
         int n;
         in>>n;
         in>>x>>y;
-        qDebug()<<x<<y;
+        //qDebug()<<x<<y;
         if(!(x==0&&y==0))
         {
             wnd->recalculateBarrier(Point (x,y));
@@ -128,6 +131,8 @@ void MyTcpSocket::readyReadSimpleSimulation()
                 delay(delay_time);
                 wnd->makePack();
             }
+            //else
+                //wnd->countReceivePack++;
         }
         //если зациклено, нужно ли переводить на новую итерацию
         else if(wnd->isLoopSimulation)
@@ -139,6 +144,7 @@ void MyTcpSocket::readyReadSimpleSimulation()
                 delay(delay_time);
                 wnd->makePack();
             }
+            //else
         }
 
     }
@@ -153,10 +159,11 @@ void MyTcpSocket::auto_mode(bool isAuto)
 void MyTcpSocket::sendData(QByteArray& arr)
 {
     //if(wnd->isMotionSimulation)
+    wnd->countSendPack++;
     socket->write(arr);
     socket->flush();
-    QString str=QTime::currentTime().toString("HH:mm:ss");
-    qDebug()<<str;
+    //QString str=QTime::currentTime().toString("HH:mm:ss");
+    //qDebug()<<str;
     if(!wnd->isWaitBPR)
         delay(delay_time);
 }

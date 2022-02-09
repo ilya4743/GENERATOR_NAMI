@@ -155,6 +155,11 @@ void MainWindow::stopSimulationBtn_click()
     disconnect(socket->GetQTcpSocket(), SIGNAL(readyRead()),socket, SLOT(readyReadSimpleSimulation()));
     ui->sendDataBtn->setEnabled(true);
     stopSimulation=true;
+    if(!isWaitBPR)
+    {
+        qDebug()<<"Pack "<<countSendPack<<" send";
+        qDebug()<<"Pack "<<countReceivePack<<" recieve";
+    }
 }
 
 void MainWindow::endlessSimulation(int state)
@@ -442,7 +447,7 @@ void MainWindow::on_sendDataBtn_clicked()
     vec_buf_barrier=vec_barrier;
     goal_point_buf=goal_point;
     stopSimulation=false;
-    count_line=40;
+    //count_line=40;
     socket->auto_mode(isMotionSimulation);
     socket->wnd=this;
     //если нет симуляции движения
@@ -482,16 +487,54 @@ void MainWindow::on_sendDataBtn_clicked()
         //если не ожидаем БПР
         if(!isWaitBPR)
         {
+            countReceivePack=0;
+            countSendPack=0;
             stop_btn->setEnabled(true);
             ui->sendDataBtn->setEnabled(false);
+            if(vec_barrier.size()==0)
+            {
+                count_line=goal_point.y+1;
+                count_line_buf=count_line;
+            }
+            else
+            {
+
+                int max=-100;
+                int min=+100;
+                float step=vec_line_edit[2]->text().toFloat();
+                for(unsigned int i=0; i<vec_barrier.size(); i++)
+                {
+                    Point left_top(vec_barrier[i].x-vec_barrier[i].width/2,vec_barrier[i].y+vec_barrier[i].height/2);
+                    Point right_bottom(vec_barrier[i].x+vec_barrier[i].width/2,vec_barrier[i].y-vec_barrier[i].height/2);
+
+                    if (abs(left_top.x) > abs(int(left_top.x / step) * step))
+                        left_top.x -= abs(left_top.x - int(left_top.x / step) * step);
+
+                    if (abs(right_bottom.x) > abs(int(right_bottom.x / step) * step))
+                        right_bottom.x +=abs(right_bottom.x - int(right_bottom.x / step) * step);
+
+                    if (abs(left_top.y) > abs(int(left_top.y / step) * step))
+                        left_top.y +=abs(left_top.y - int(left_top.y / step) * step);
+
+                    if (abs(right_bottom.y) > abs(int(right_bottom.y / step) * step))
+                        right_bottom.y -= abs(right_bottom.y - int(right_bottom.y / step) * step);
+
+                    if(int(left_top.y)/step>max) max=int(left_top.y);
+                    if(int(right_bottom.y)/step<min) min=int(right_bottom.y);
+                    //qDebug()<<max;
+                    //qDebug()<<min;
+                }
+                count_line=max+2;
+                count_line_buf=count_line;
+            }
             while(!stopSimulation)
             {
                 makePack();
             }
-
         }
         else
         {
+
             //если движение зациклено или точка маршрута недостижима
             if(isLoopSimulation||isEndlessSimulation)
             {
@@ -499,8 +542,45 @@ void MainWindow::on_sendDataBtn_clicked()
                 ui->sendDataBtn->setEnabled(false);
             }
             //если движение зациклено и точка маршрута недостижима
-            //if(isLoopSimulation&&isEndlessSimulation)
-            //    count_line=40;
+            if(isLoopSimulation&&isEndlessSimulation)
+            {
+                if(vec_barrier.size()==0)
+                {
+                    count_line=goal_point.y+1;
+                    count_line_buf=count_line;
+                }
+                else
+                {
+
+                    int max=-100;
+                    int min=+100;
+                    float step=vec_line_edit[2]->text().toFloat();
+                    for(unsigned int i=0; i<vec_barrier.size(); i++)
+                    {
+                        Point left_top(vec_barrier[i].x-vec_barrier[i].width/2,vec_barrier[i].y+vec_barrier[i].height/2);
+                        Point right_bottom(vec_barrier[i].x+vec_barrier[i].width/2,vec_barrier[i].y-vec_barrier[i].height/2);
+
+                        if (abs(left_top.x) > abs(int(left_top.x / step) * step))
+                            left_top.x -= abs(left_top.x - int(left_top.x / step) * step);
+
+                        if (abs(right_bottom.x) > abs(int(right_bottom.x / step) * step))
+                            right_bottom.x +=abs(right_bottom.x - int(right_bottom.x / step) * step);
+
+                        if (abs(left_top.y) > abs(int(left_top.y / step) * step))
+                            left_top.y +=abs(left_top.y - int(left_top.y / step) * step);
+
+                        if (abs(right_bottom.y) > abs(int(right_bottom.y / step) * step))
+                            right_bottom.y -= abs(right_bottom.y - int(right_bottom.y / step) * step);
+
+                        if(int(left_top.y)/step>max) max=int(left_top.y);
+                        if(int(right_bottom.y)/step<min) min=int(right_bottom.y);
+                        //qDebug()<<max;
+                        //qDebug()<<min;
+                    }
+                    count_line=max+2;
+                    count_line_buf=count_line;
+                }
+            }
             makePack();
         }
     }

@@ -77,6 +77,9 @@ public:
     Point goal_point;
     Point goal_point_buf;
     int count_line;
+    int count_line_buf;
+    int countSendPack;
+    int countReceivePack;
     void recalculateBarrier(Point P);
     void recalculateGoal(Point p);
     void recalculateGoalX(float x);
