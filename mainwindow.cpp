@@ -47,21 +47,32 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     //подставляем значение параметров в виджеты
     vec_line_edit.reserve(9);
     vec_label.reserve(9);
-    for(unsigned int i=0; i<9; i++)
+    for(unsigned int i=0; i<8; i++)
     {
-        this->vec_line_edit.push_back(new QLineEdit());
-        this->vec_line_edit[i]->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-        this->vec_line_edit[i]->setText(vec_str_data[i]);
+        vec_line_edit.push_back(new QLineEdit());
+        vec_line_edit[i]->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
+        vec_line_edit[i]->setText(vec_str_data[i]);
 
         //this->vec_line_edit [i]->setValidator(validator);
-        this->vec_label.push_back(new QLabel(vec_str_param[i]));
-        ui->formLayout->addWidget(this->vec_label[i],i,0);
+        vec_label.push_back(new QLabel(vec_str_param[i]));
+        ui->formLayout->addWidget(vec_label[i],i,0);
         vec_label[i]->setAlignment(Qt::AlignRight|Qt::AlignBottom);
 
-        ui->formLayout->addWidget(this->vec_line_edit[i],i,1);
+        ui->formLayout->addWidget(vec_line_edit[i],i,1);
         //ui->formLayout->addRow(this->vec_label[i], this->vec_line_edit[i]);
     }
+    vec_line_edit.push_back(new QLineEdit());
+    vec_line_edit[8]->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
+    vec_line_edit[8]->setText(vec_str_data[8]);
+    vec_label.push_back(new QLabel(vec_str_param[8]));
+    ui->formLayout->addWidget(vec_label[8],8,0);
+    vec_label[8]->setAlignment(Qt::AlignRight|Qt::AlignBottom);
 
+    spinBoxN=new QSpinBox;
+    //spinBoxN->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
+    spinBoxN->setValue(vec_str_data[8].toInt());
+    ui->formLayout->addWidget(spinBoxN,8,1);
+    connect(spinBoxN, SIGNAL(textChanged(const QString &)),this, SLOT(textChanged(const QString &)));
     //добавим comboBox для выбора положения center
     ui->formLayout->addWidget(&qComboBox,3,3);
     qComboBox.setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
@@ -80,8 +91,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 
         //this->vec_line_edit[i]->setValidator(validator);
         vec_label.push_back(new QLabel(vec_str_param[i]));
-        ui->formLayout_4->addWidget(this->vec_label[i]);
-        ui->formLayout_4->addRow(this->vec_label[i], this->vec_line_edit[i]);
+        ui->formLayout_4->addWidget(vec_label[i]);
+        ui->formLayout_4->addRow(vec_label[i], vec_line_edit[i]);
     }
 
     vec_check_box.push_back(new QCheckBox("Симуляция движения"));
@@ -92,8 +103,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     isWaitBPR=true;
     for(unsigned int i=0; i<vec_check_box.size();i++)
     {
-        ui->formLayout_4->addWidget(this->vec_check_box[i]);
-        ui->formLayout_4->addRow(this->vec_check_box[i]);
+        ui->formLayout_4->addWidget(vec_check_box[i]);
+        ui->formLayout_4->addRow(vec_check_box[i]);
     }
     vec_check_box[1]->setEnabled(false);
     vec_check_box[2]->setEnabled(false);
@@ -102,8 +113,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     connect(vec_check_box[1],SIGNAL(stateChanged(int)),this,SLOT(loopSimulation(int)));
     connect(vec_check_box[2],SIGNAL(stateChanged(int)),this,SLOT(endlessSimulation(int)));
     connect(vec_check_box[3],SIGNAL(stateChanged(int)),this,SLOT(waitBPR(int)));
-
-    if(vec_line_edit[8]->text().toInt()==0)
+    if(spinBoxN->value()==0)
         for(unsigned int i=9; i<vec_str_param.size();i++)
             vec_line_edit[i]->setEnabled(false);
 
@@ -120,7 +130,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     stop_btn->setEnabled(false);
     ui->formLayout_4->addRow(stop_btn);
 
-    connect(vec_line_edit[8], SIGNAL(textChanged(const QString &)),this, SLOT(textChanged(const QString &)));
+    //connect(vec_line_edit[8], SIGNAL(textChanged(const QString &)),this, SLOT(textChanged(const QString &)));
     connect(vec_line_edit[9], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier1(const QString &)));
     connect(vec_line_edit[10], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier2(const QString &)));
     connect(vec_line_edit[11], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier3(const QString &)));
@@ -310,7 +320,7 @@ void MainWindow::textChangedBarrier4(const QString &arg1)
 
 void MainWindow::textChanged(const QString &arg1)
 {
-    if(vec_line_edit[8]->text().toInt()==0)
+    if(arg1.toInt()==0)
     {
         for(unsigned int i=9; i<vec_line_edit.size();i++)
             vec_line_edit[i]->setEnabled(false);
@@ -320,7 +330,7 @@ void MainWindow::textChanged(const QString &arg1)
     {
         for(unsigned int i=9; i<vec_line_edit.size();i++)
             vec_line_edit[i]->setEnabled(true);
-        vec_barrier.resize(vec_line_edit[8]->text().toInt());
+        vec_barrier.resize(arg1.toInt());
     }
     ui->comboBox->clear();
     for(int i=0; i<arg1.toInt();i++)
@@ -341,8 +351,9 @@ MainWindow::~MainWindow()
         delete(*it);
     vec_check_box.clear();
     delete stop_btn;
-    if (settings_wnd!=NULL)
-        delete settings_wnd;
+    //if (settings_wnd!=nullptr)
+    //    delete settings_wnd;
+    delete spinBoxN;
 }
 
 
@@ -376,9 +387,9 @@ void MainWindow::on_action_triggered()
         file2.close();
     }
 
-    for(int i=0; i<9; i++)
+    for(int i=0; i<8; i++)
         vec_line_edit[i]->setText(vec_str_data[i]);
-
+    spinBoxN->setValue(vec_str_data[8].toInt());
     qComboBox.setCurrentIndex(0);
     ui->comboBox->clear();
     vec_barrier.clear();
@@ -433,7 +444,7 @@ void MainWindow::makePack()
         dataStream<<vec_line_edit[i]->text().toFloat();
 
     dataStream<<goal_point_buf.x<<goal_point_buf.y;
-    dataStream<<vec_line_edit[8]->text().toInt();
+    dataStream<<spinBoxN->value();
 
     for(unsigned int i=0; i<vec_buf_barrier.size();i++)
         dataStream<<vec_buf_barrier[i].x<<vec_buf_barrier[i].y<<vec_buf_barrier[i].width<<vec_buf_barrier[i].height;
@@ -466,7 +477,7 @@ void MainWindow::on_sendDataBtn_clicked()
         for(int i=4; i<8; i++)
             dataStream<<vec_line_edit[i]->text().toFloat();
 
-        dataStream<<vec_line_edit[8]->text().toInt();
+        dataStream<<spinBoxN->value();
 
         for(unsigned int i=0; i<vec_barrier.size();i++)
             dataStream<<vec_barrier[i].x<<vec_barrier[i].y<<vec_barrier[i].width<<vec_barrier[i].height;
@@ -591,7 +602,26 @@ void MainWindow::on_SettingsBtn_triggered()
 {
     //settings_wnd=new Settings();
     //settings_wnd->show();
-    Dialog *d=new Dialog();
-    d->show();
+    //Dialog *d=new Dialog();
+    //d->show();
 }
 
+
+void MainWindow::on_action_2_triggered()
+{
+    QString str = QFileDialog::getSaveFileName(this, tr("Сохранить файл"),"sequences/sequence.txt",tr ("." ));
+    QFile file("sequences/sequence.txt");
+    if(file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        QTextStream writeStream(&file);
+        for(int i=0; i<3; i++)
+            writeStream<<vec_line_edit[i]->text().toFloat()<<endl;
+        writeStream<<vec_line_edit[3]->text().toInt()<<endl;
+        for(int i=4; i<8; i++)
+            writeStream<<vec_line_edit[i]->text().toFloat()<<endl;
+        writeStream<<spinBoxN->value()<<endl;
+        for(int i=0; i<spinBoxN->value();i++)
+                writeStream<<vec_barrier[i].x<<endl<<vec_barrier[i].y<<endl<<vec_barrier[i].width<<endl<<vec_barrier[i].height<<endl;
+    }
+    file.close();
+}

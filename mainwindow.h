@@ -7,11 +7,12 @@
 #include <QComboBox>
 #include <vector>
 #include <QCheckBox>
-#include <mytcpserver.h>
+#include "mytcpserver.h"
 #include "mytcpsocket.h"
 #include"point.h"
 #include <QPushButton>
 #include"settings.h"
+#include<QSpinBox>
 
 using namespace std;
 QT_BEGIN_NAMESPACE
@@ -24,7 +25,8 @@ struct Barrier
     float y;
     float width;
     float height;
-};
+};    //QTextStream &operator<<(const QString &s);
+
 class MyTcpSocket;
 class MainWindow : public QMainWindow
 {
@@ -59,6 +61,8 @@ private slots:
     void stopSimulationBtn_click();
     void on_SettingsBtn_triggered();
 
+    void on_action_2_triggered();
+
 private:
     int ind;
     vector<QLineEdit*> vec_line_edit;
@@ -68,6 +72,7 @@ private:
     QComboBox qComboBox;
     Settings *settings_wnd;
     vector<QCheckBox*> vec_check_box;
+    QSpinBox* spinBoxN;
 
 public:
     QPushButton *stop_btn;
