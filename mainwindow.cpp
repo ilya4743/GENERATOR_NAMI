@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QMessageBox>
-#include <QRegExpValidator>
+//#include <QRegExpValidator>
 #include<QFile>
 #include"mytcpsocket.h"
 #include <QFileDialog>
@@ -606,22 +606,51 @@ void MainWindow::on_SettingsBtn_triggered()
     //d->show();
 }
 
+#include<tinyxml.h>
 
 void MainWindow::on_action_2_triggered()
 {
     QString str = QFileDialog::getSaveFileName(this, tr("Сохранить файл"),"sequences/sequence.txt",tr ("." ));
-    QFile file("sequences/sequence.txt");
-    if(file.open(QIODevice::WriteOnly | QIODevice::Text))
+    QFile file1("sequences/sequence.txt");
+    if(file1.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        QTextStream writeStream(&file);
+        QTextStream writeStream(&file1);
         for(int i=0; i<3; i++)
-            writeStream<<vec_line_edit[i]->text().toFloat()<<endl;
-        writeStream<<vec_line_edit[3]->text().toInt()<<endl;
+            writeStream<<vec_line_edit[i]->text().toFloat()<<'\n';
+        writeStream<<vec_line_edit[3]->text().toInt()<<'\n';
         for(int i=4; i<8; i++)
-            writeStream<<vec_line_edit[i]->text().toFloat()<<endl;
-        writeStream<<spinBoxN->value()<<endl;
+            writeStream<<vec_line_edit[i]->text().toFloat()<<'\n';
+        writeStream<<spinBoxN->value()<<'\n';
         for(int i=0; i<spinBoxN->value();i++)
-                writeStream<<vec_barrier[i].x<<endl<<vec_barrier[i].y<<endl<<vec_barrier[i].width<<endl<<vec_barrier[i].height<<endl;
+                writeStream<<vec_barrier[i].x<<'\n'<<vec_barrier[i].y<<'\n'<<vec_barrier[i].width<<'\n'<<vec_barrier[i].height<<'\n';
     }
-    file.close();
+    file1.close();
+
+    QFile file2("sequences/sequence.xml");
+    if(file2.open(QIODevice::WriteOnly))
+    {
+        QXmlStreamWriter XMLWriter(&file2);
+        XMLWriter.setAutoFormatting(true);
+        XMLWriter.writeStartDocument();
+        XMLWriter.writeStartElement("scene");
+        XMLWriter.writeAttribute("author", "suvairin" );
+        XMLWriter.writeAttribute("formatVersion", "1.1");
+
+        BarrierXMLWriter barrierXMLWriter;
+        for(int i=0; i<spinBoxN->value();i++)
+            barrierXMLWriter.print(XMLWriter, vec_barrier[i]);
+
+        XMLWriter.writeStartElement("externals");
+        XMLWriter.writeEndElement();
+        XMLWriter.writeStartElement("environment");
+        XMLWriter.writeStartElement("colourBackground");
+        XMLWriter.writeAttribute("b", "0.050876");
+        XMLWriter.writeAttribute("g", "0.050876");
+        XMLWriter.writeAttribute("r", "0.050876");
+        XMLWriter.writeEndElement();
+        XMLWriter.writeEndElement();
+
+        XMLWriter.writeEndElement();
+    }
+    file2.close();
 }

@@ -1,5 +1,7 @@
-QT -= gui
+QT = gui
 QT += network
+QT += xml
+
 CONFIG += c++11 console
 CONFIG -= app_bundle
 

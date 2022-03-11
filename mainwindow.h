@@ -13,19 +13,65 @@
 #include <QPushButton>
 #include"settings.h"
 #include<QSpinBox>
+#include<QXmlStreamWriter>
 
 using namespace std;
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 class Settings;
 QT_END_NAMESPACE
-struct Barrier
+class Barrier
 {
+public:
     float x;
     float y;
     float width;
     float height;
-};    //QTextStream &operator<<(const QString &s);
+    Barrier():x(0),y(0),width(0), height(0){}
+    Barrier(float x,float y,float width,float height):x(x),y(y),width(width),height(height){}
+    Barrier(const Barrier& barrier):x(barrier.x),y(barrier.y), width(barrier.width), height(barrier.height){}
+    ~Barrier(){};
+};
+
+class BarrierXMLWriter
+{
+public:
+    int countBarrier=0;
+    void print(QXmlStreamWriter& XMLWriter, const Barrier& barrier)
+    {
+        XMLWriter.writeStartElement("node");
+        XMLWriter.writeAttribute("name", "Cube." + QString::number(countBarrier));
+
+        XMLWriter.writeStartElement("position");
+        XMLWriter.writeAttribute("x",QString::number(barrier.x));
+        XMLWriter.writeAttribute("y",QString::number(barrier.y));
+        XMLWriter.writeAttribute("z","0" );
+        XMLWriter.writeEndElement();
+
+        XMLWriter.writeStartElement("rotation");
+        XMLWriter.writeAttribute("qw","0");
+        XMLWriter.writeAttribute("qx","0");
+        XMLWriter.writeAttribute("qy","0");
+        XMLWriter.writeAttribute("qz","0" );
+        XMLWriter.writeEndElement();
+
+        XMLWriter.writeStartElement("scale");
+        XMLWriter.writeAttribute("x",QString::number(barrier.width));
+        XMLWriter.writeAttribute("y",QString::number(barrier.height));
+        XMLWriter.writeAttribute("z","1" );
+        XMLWriter.writeEndElement();
+
+        XMLWriter.writeStartElement("entity");
+        XMLWriter.writeAttribute("meshFile","Cube."+ QString::number(countBarrier)+".mesh");
+        XMLWriter.writeAttribute("name","Cube." + QString::number(countBarrier));
+        XMLWriter.writeStartElement("userData");
+        XMLWriter.writeEndElement();
+        XMLWriter.writeEndElement();
+        XMLWriter.writeEndElement();
+
+        ++countBarrier;
+    }
+};
 
 class MyTcpSocket;
 class MainWindow : public QMainWindow

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene author="suvairin" formatVersion="1.1">
+    <node name="Cube.0">
+        <position x="-3" y="4" z="0"/>
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
+        <scale x="1" y="5" z="1"/>
+        <entity meshFile="Cube.0.mesh" name="Cube.0">
+            <userData/>
+        </entity>
+    </node>
+    <node name="Cube.1">
+        <position x="-3" y="16" z="0"/>
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
+        <scale x="1" y="5" z="1"/>
+        <entity meshFile="Cube.1.mesh" name="Cube.1">
+            <userData/>
+        </entity>
+    </node>
+    <node name="Cube.2">
+        <position x="1" y="10" z="0"/>
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
+        <scale x="1" y="0" z="1"/>
+        <entity meshFile="Cube.2.mesh" name="Cube.2">
+            <userData/>
+        </entity>
+    </node>
+    <node name="Cube.3">
+        <position x="-6" y="10" z="0"/>
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
+        <scale x="1" y="1" z="1"/>
+        <entity meshFile="Cube.3.mesh" name="Cube.3">
+            <userData/>
+        </entity>
+    </node>
+    <node name="Cube.4">
+        <position x="8" y="28" z="0"/>
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
+        <scale x="2" y="3" z="1"/>
+        <entity meshFile="Cube.4.mesh" name="Cube.4">
+            <userData/>
+        </entity>
+    </node>
+    <node name="Cube.5">
+        <position x="-6" y="0" z="0"/>
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
+        <scale x="2" y="3" z="1"/>
+        <entity meshFile="Cube.5.mesh" name="Cube.5">
+            <userData/>
+        </entity>
+    </node>
+    <node name="Cube.6">
+        <position x="1" y="40" z="0"/>
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
+        <scale x="2" y="3" z="1"/>
+        <entity meshFile="Cube.6.mesh" name="Cube.6">
+            <userData/>
+        </entity>
+    </node>
+    <node name="Cube.7">
+        <position x="8" y="50" z="0"/>
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
+        <scale x="2" y="3" z="1"/>
+        <entity meshFile="Cube.7.mesh" name="Cube.7">
+            <userData/>
+        </entity>
+    </node>
+    <node name="Cube.8">
+        <position x="-3" y="50" z="0"/>
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
+        <scale x="1" y="34" z="1"/>
+        <entity meshFile="Cube.8.mesh" name="Cube.8">
+            <userData/>
+        </entity>
+    </node>
+    <node name="Cube.9">
+        <position x="12" y="34" z="0"/>
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
+        <scale x="1" y="66" z="1"/>
+        <entity meshFile="Cube.9.mesh" name="Cube.9">
+            <userData/>
+        </entity>
+    </node>
+    <node name="Cube.10">
+        <position x="-14" y="34" z="0"/>
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
+        <scale x="1" y="66" z="1"/>
+        <entity meshFile="Cube.10.mesh" name="Cube.10">
+            <userData/>
+        </entity>
+    </node>
+    <externals/>
+    <environment>
+        <colourBackground b="0.050876" g="0.050876" r="0.050876"/>
+    </environment>
+</scene>
