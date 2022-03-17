@@ -59,7 +59,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
         vec_label[i]->setAlignment(Qt::AlignRight|Qt::AlignBottom);
 
         ui->formLayout->addWidget(vec_line_edit[i],i,1);
-        //ui->formLayout->addRow(this->vec_label[i], this->vec_line_edit[i]);
     }
     vec_line_edit.push_back(new QLineEdit());
     vec_line_edit[8]->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
@@ -131,7 +130,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     ui->formLayout_4->addRow(stop_btn);
 
     //connect(vec_line_edit[8], SIGNAL(textChanged(const QString &)),this, SLOT(textChanged(const QString &)));
-    connect(vec_line_edit[9], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier1(const QString &)));
+    connect(vec_line_edit[9],  SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier1(const QString &)));
     connect(vec_line_edit[10], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier2(const QString &)));
     connect(vec_line_edit[11], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier3(const QString &)));
     connect(vec_line_edit[12], SIGNAL(textChanged(const QString &)),this, SLOT(textChangedBarrier4(const QString &)));
@@ -146,6 +145,14 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     isEndlessSimulation=false;
     isWaitBPR=true;
     stopSimulation=false;
+
+    map.width=vec_line_edit[0]->text().toFloat();
+    map.height=vec_line_edit[1]->text().toFloat();
+    map.step=vec_line_edit[2]->text().toFloat();
+    map.center=vec_line_edit[3]->text().toInt();
+
+    car.width=vec_line_edit[4]->text().toFloat();
+    car.height=vec_line_edit[5]->text().toFloat();
 }
 
 void MainWindow::waitBPR(int state)
@@ -234,28 +241,33 @@ void MainWindow::motionSimulation(int state)
 void MainWindow::textChanged1(const QString &s)
 {
     int width, height;
-    width=vec_line_edit[0]->text().toFloat()/vec_line_edit[2]->text().toFloat();
-    height=vec_line_edit[1]->text().toFloat()/vec_line_edit[2]->text().toFloat();
+    width=map.width/map.step;
+    height=map.height/map.step;
     switch(qComboBox.currentIndex())
     {
         case 1:
             vec_line_edit[3]->setText(QVariant((width / 2) + (height/2)*(width)).toString());
+            map.center=(width / 2) + (height/2)*(width);
         break;
 
         case 2:
             vec_line_edit[3]->setText(QVariant((width / 2) + (height-1)*(width)).toString());
+            map.center=(width / 2) + (height-1)*(width);
         break;
 
         case 3:
             vec_line_edit[3]->setText(QVariant((height/2)*(width)).toString());
+            map.center=(height/2)*(width);
         break;
 
         case 4:
             vec_line_edit[3]->setText(QVariant((width-1) + (height/2)*(width)).toString());
+            map.center=(width-1) + (height/2)*(width);
         break;
 
         case 5:
             vec_line_edit[3]->setText(QVariant((width / 2)).toString());
+            map.center=(width / 2);
         break;
     }
 }
@@ -263,37 +275,43 @@ void MainWindow::textChanged1(const QString &s)
 void MainWindow::currentIndexCenterChanged(int index)
 {
     int width, height;
-    width=vec_line_edit[0]->text().toFloat()/vec_line_edit[2]->text().toFloat();
-    height=vec_line_edit[1]->text().toFloat()/vec_line_edit[2]->text().toFloat();
+    width=map.width/map.step;
+    height=map.height/map.step;
     switch(index)
     {
         case 0:
             vec_line_edit[3]->setEnabled(true);
+            map.center=vec_line_edit[3]->text().toInt();
         break;
 
         case 1:
             vec_line_edit[3]->setEnabled(false);
             vec_line_edit[3]->setText(QVariant((width / 2) + (height/2)*(width)).toString());
+            map.center=(width / 2) + (height/2)*(width);
         break;
 
         case 2:
             vec_line_edit[3]->setEnabled(false);
             vec_line_edit[3]->setText(QVariant((width / 2) + (height-1)*(width)).toString());
+            map.center=(width / 2) + (height-1)*(width);
         break;
 
         case 3:
             vec_line_edit[3]->setEnabled(false);
             vec_line_edit[3]->setText(QVariant((height/2)*(width)).toString());
+            map.center=(height/2)*(width);
         break;
 
         case 4:
             vec_line_edit[3]->setEnabled(false);
             vec_line_edit[3]->setText(QVariant((width-1) + (height/2)*(width)).toString());
+            map.center=(width-1) + (height/2)*(width);
         break;
 
         case 5:
             vec_line_edit[3]->setEnabled(false);
             vec_line_edit[3]->setText(QVariant((width / 2)).toString());
+            map.center=(width / 2);
         break;
     }
 }
@@ -372,19 +390,37 @@ void MainWindow::on_comboBox_currentIndexChanged(int index)
 
 void MainWindow::on_action_triggered()
 {
-    vector<QString> vec_str_data;
+    //vector<QString> vec_str_data;
     QString str = QFileDialog::getOpenFileName(0, "Open Dialog", "", "*.txt");
-    QFile file2(str);
+    BarrierParser handler;
+    QFile file2("/home/NAMI/ila.solomatin/Desktop/GENERATOR_NAMI/build/sequences/sequence.xml");
     if ((file2.exists())&&(file2.open(QIODevice::ReadOnly)))
     {
-        QString str="";
-        while(!file2.atEnd())
+        QXmlInputSource source(&file2);
+        QXmlSimpleReader reader;
+        reader.setContentHandler(&handler);
+        reader.setErrorHandler(&handler);
+        if(reader.parse(source))
         {
-            str=str+file2.readLine();
-            vec_str_data.push_back(str);
-            str="";
+            float x, y, width, height;
+            GameMap m;
+            Car c;
+            QDataStream stream(&handler.data, QIODevice::ReadOnly);
+            stream>>m;
+            stream>>c;
+            vec_barrier.clear();
+            int i;
+            stream>>i;
+            vec_barrier.reserve(i);
+            for(int j=0; j<i; j++)
+            {
+                stream>>x>>y;
+                stream.skipRawData(4);
+                stream>>width>>height;
+                stream.skipRawData(4);
+                vec_barrier.push_back(Barrier(x,y,width,height));
+            }
         }
-        file2.close();
     }
 
     for(int i=0; i<8; i++)
@@ -402,10 +438,13 @@ void MainWindow::on_action_triggered()
         vec_barrier[i].width=vec_str_data[9+i*4+2].toFloat();
         vec_barrier[i].height=vec_str_data[9+i*4+3].toFloat();
     }
-    vec_line_edit[9] ->setText(QString::number(vec_barrier[0].x));
-    vec_line_edit[10]->setText(QString::number(vec_barrier[0].y));
-    vec_line_edit[11]->setText(QString::number(vec_barrier[0].width));
-    vec_line_edit[12]->setText(QString::number(vec_barrier[0].height));
+    if(vec_str_data[8].toInt()>0)
+    {
+        vec_line_edit[9] ->setText(QString::number(vec_barrier[0].x));
+        vec_line_edit[10]->setText(QString::number(vec_barrier[0].y));
+        vec_line_edit[11]->setText(QString::number(vec_barrier[0].width));
+        vec_line_edit[12]->setText(QString::number(vec_barrier[0].height));
+    }
 }
 
 void MainWindow::recalculateBarrier(Point p)
@@ -435,19 +474,22 @@ void MainWindow::makePack()
     dataStream.setFloatingPointPrecision(QDataStream::SinglePrecision);
     dataStream.setByteOrder(QDataStream::LittleEndian);
     dataStream<<(unsigned char)0x44<<(unsigned char)0x47;
-    for(int i=0; i<3; i++)
-        dataStream<<vec_line_edit[i]->text().toFloat();
+    //for(int i=0; i<3; i++)
+    //    dataStream<<vec_line_edit[i]->text().toFloat();
+    dataStream<<map<<car;
+    //dataStream<<vec_line_edit[3]->text().toInt();
 
-    dataStream<<vec_line_edit[3]->text().toInt();
-
-    for(int i=4; i<=5; i++)
-        dataStream<<vec_line_edit[i]->text().toFloat();
+    //for(int i=4; i<=5; i++)
+    //    dataStream<<vec_line_edit[i]->text().toFloat();
 
     dataStream<<goal_point_buf.x<<goal_point_buf.y;
     dataStream<<spinBoxN->value();
 
+    //for(unsigned int i=0; i<vec_buf_barrier.size();i++)
+    //    dataStream<<vec_buf_barrier[i].x<<vec_buf_barrier[i].y<<vec_buf_barrier[i].width<<vec_buf_barrier[i].height;
+
     for(unsigned int i=0; i<vec_buf_barrier.size();i++)
-        dataStream<<vec_buf_barrier[i].x<<vec_buf_barrier[i].y<<vec_buf_barrier[i].width<<vec_buf_barrier[i].height;
+        dataStream<<vec_buf_barrier[i];
     socket->sendData(arr);
 }
 
@@ -464,7 +506,7 @@ void MainWindow::on_sendDataBtn_clicked()
     //если нет симуляции движения
     if(!isMotionSimulation)
     {
-        QByteArray arr;
+       /* QByteArray arr;
         QDataStream dataStream(&arr, QIODevice::WriteOnly);
         dataStream.setFloatingPointPrecision(QDataStream::SinglePrecision);
         dataStream.setByteOrder(QDataStream::LittleEndian);
@@ -482,6 +524,28 @@ void MainWindow::on_sendDataBtn_clicked()
         for(unsigned int i=0; i<vec_barrier.size();i++)
             dataStream<<vec_barrier[i].x<<vec_barrier[i].y<<vec_barrier[i].width<<vec_barrier[i].height;
 
+        socket->sendData(arr);*/
+        QByteArray arr;
+        QDataStream dataStream(&arr, QIODevice::WriteOnly);
+        dataStream.setFloatingPointPrecision(QDataStream::SinglePrecision);
+        dataStream.setByteOrder(QDataStream::LittleEndian);
+        dataStream<<(unsigned char)0x44<<(unsigned char)0x47;
+        //for(int i=0; i<3; i++)
+        //    dataStream<<vec_line_edit[i]->text().toFloat();
+        dataStream<<map<<car;
+        //dataStream<<vec_line_edit[3]->text().toInt();
+
+        //for(int i=4; i<=5; i++)
+        //    dataStream<<vec_line_edit[i]->text().toFloat();
+
+        dataStream<<goal_point_buf.x<<goal_point_buf.y;
+        dataStream<<spinBoxN->value();
+
+        //for(unsigned int i=0; i<vec_buf_barrier.size();i++)
+        //    dataStream<<vec_buf_barrier[i].x<<vec_buf_barrier[i].y<<vec_buf_barrier[i].width<<vec_buf_barrier[i].height;
+
+        for(unsigned int i=0; i<vec_buf_barrier.size();i++)
+            dataStream<<vec_buf_barrier[i];
         socket->sendData(arr);
     }
     //если есть симуляция движения
@@ -606,12 +670,11 @@ void MainWindow::on_SettingsBtn_triggered()
     //d->show();
 }
 
-#include<tinyxml.h>
 
 void MainWindow::on_action_2_triggered()
 {
     QString str = QFileDialog::getSaveFileName(this, tr("Сохранить файл"),"sequences/sequence.txt",tr ("." ));
-    QFile file1("sequences/sequence.txt");
+    /*QFile file1("sequences/sequence.txt");
     if(file1.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         QTextStream writeStream(&file1);
@@ -624,7 +687,7 @@ void MainWindow::on_action_2_triggered()
         for(int i=0; i<spinBoxN->value();i++)
                 writeStream<<vec_barrier[i].x<<'\n'<<vec_barrier[i].y<<'\n'<<vec_barrier[i].width<<'\n'<<vec_barrier[i].height<<'\n';
     }
-    file1.close();
+    file1.close();*/
 
     QFile file2("sequences/sequence.xml");
     if(file2.open(QIODevice::WriteOnly))
@@ -635,7 +698,13 @@ void MainWindow::on_action_2_triggered()
         XMLWriter.writeStartElement("scene");
         XMLWriter.writeAttribute("author", "suvairin" );
         XMLWriter.writeAttribute("formatVersion", "1.1");
-
+        GameMapXMLWriter mapXML;
+        mapXML.print(XMLWriter, map);
+        CarXMLWriter carXML;
+        carXML.print(XMLWriter, car);
+        XMLWriter.writeStartElement("CountBarriers");
+        XMLWriter.writeAttribute("n", QString::number(spinBoxN->value()));
+        XMLWriter.writeEndElement();
         BarrierXMLWriter barrierXMLWriter;
         for(int i=0; i<spinBoxN->value();i++)
             barrierXMLWriter.print(XMLWriter, vec_barrier[i]);
