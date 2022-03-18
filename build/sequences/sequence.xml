@@ -1,8 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scene author="suvairin" formatVersion="1.1">
     <GameMap width="11" height="10" step="1" center="104"/>
-    <Car width="0" height="0"/>
-    <CountBarriers n="0"/>
+    <Car width="3" height="3"/>
+    <Goal x="-5" y="10"/>
+    <CountBarriers n="3"/>
+    <node name="Cube.0">
+        <position x="0" y="3" z="0"/>
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
+        <scale x="1" y="1" z="1"/>
+        <entity meshFile="Cube.0.mesh" name="Cube.0">
+            <userData/>
+        </entity>
+    </node>
+    <node name="Cube.1">
+        <position x="0" y="6" z="0"/>
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
+        <scale x="1" y="1" z="1"/>
+        <entity meshFile="Cube.1.mesh" name="Cube.1">
+            <userData/>
+        </entity>
+    </node>
+    <node name="Cube.2">
+        <position x="-2" y="8" z="0"/>
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
+        <scale x="1" y="1" z="1"/>
+        <entity meshFile="Cube.2.mesh" name="Cube.2">
+            <userData/>
+        </entity>
+    </node>
     <externals/>
     <environment>
         <colourBackground b="0.050876" g="0.050876" r="0.050876"/>

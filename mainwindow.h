@@ -258,7 +258,12 @@ public:
                     *dataStream<<attrs.value(0).toInt();
                     return true;
                 }
-                    return false;
+                if(name=="Goal")
+                {
+                    *dataStream<<attrs.value(0).toFloat()<<attrs.value(1).toFloat();
+                    return true;
+                }
+                return false;
             }
             return true;
     }
@@ -331,7 +336,8 @@ private:
     Settings *settings_wnd;
     vector<QCheckBox*> vec_check_box;
     QSpinBox* spinBoxN;
-
+    void updateWidgets();
+    void updateValues();
 public:
     QPushButton *stop_btn;
     Ui::MainWindow *ui;
@@ -354,5 +360,6 @@ public:
     bool stopSimulation;
     Car car;
     GameMap map;
+    int countBarriers;
 };
 #endif // MAINWINDOW_H

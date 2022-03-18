@@ -2,6 +2,7 @@
 #define POINT_H
 
 #include<fstream>
+#include<QDataStream>
 
 class Point
 {
@@ -22,5 +23,7 @@ public:
 
     }
     friend std::ofstream& operator<<(std::ofstream &out, const Point &p);
+    friend QDataStream& operator <<(QDataStream &out, const Point &point);
+    friend QDataStream& operator >>(QDataStream &in, Point &point);
 };
 #endif // POINT_H
