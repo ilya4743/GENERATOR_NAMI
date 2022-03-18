@@ -7,27 +7,19 @@
 MyTcpSocket::MyTcpSocket(QObject *parent) : QObject(parent)
 {
     delay_time=1000;
+    reconnect_time=5000;
 }
 
 void MyTcpSocket::doConnect()
 {
+    qDebug() << "connecting...";
     socket = new QTcpSocket(this);
-
     connect(socket, SIGNAL(connected()),this, SLOT(connected()));
     connect(socket, SIGNAL(disconnected()),this, SLOT(disconnected()));
     connect(socket, SIGNAL(bytesWritten(qint64)),this, SLOT(bytesWritten(qint64)));
     connect(socket, SIGNAL(readyRead()),this, SLOT(readyReadNoSimulation()));
-
-    qDebug() << "connecting...";
-
-    // this is not blocking call
+    connect(socket, SIGNAL(errorOccurred(QAbstractSocket::SocketError )),this,SLOT(Error(QAbstractSocket::SocketError)));
     socket->connectToHost("localhost", 15555);
-
-    // we need to wait...
-    if(!socket->waitForConnected(5000))
-    {
-        qDebug() << "Error: " << socket->errorString();
-    }
 }
 
 void MyTcpSocket::connected()
@@ -38,6 +30,18 @@ void MyTcpSocket::connected()
 void MyTcpSocket::disconnected()
 {
     qDebug() << "disconnected...";
+}
+
+void MyTcpSocket::reconnect()
+{
+    socket->connectToHost("localhost", 15555);
+}
+
+void MyTcpSocket::Error(QAbstractSocket::SocketError socketError)
+{
+    qDebug() << "Error: " << socketError;
+    qDebug()<<"Reconnect!";
+    QTimer::singleShot(reconnect_time, this, SLOT(reconnect()));
 }
 
 void MyTcpSocket::bytesWritten(qint64 bytes)
@@ -166,4 +170,6 @@ void MyTcpSocket::sendData(QByteArray& arr)
     //qDebug()<<str;
     if(!wnd->isWaitBPR)
         delay(delay_time);
+    //QTimer::singleShot(delay_time, this);
+
 }

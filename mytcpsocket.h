@@ -25,10 +25,13 @@ public slots:
     void readyReadSimpleSimulation();
     void readyReadEndlessSimulation();
     void readyReadNoSimulation();
+    void reconnect();
+    void Error(QAbstractSocket::SocketError socketError);
 
 private:
     QTcpSocket *socket;
     int delay_time;
+    int reconnect_time;
 public:
     MainWindow* wnd;
     bool auto_send;
