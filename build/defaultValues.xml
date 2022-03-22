@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene author="suvairin" formatVersion="1.1">
+    <GameMap width="11" height="10" step="1" center="104"/>
+    <Car width="0" height="0"/>
+    <Goal x="-4" y="4"/>
+    <CountBarriers n="0"/>
+    <externals/>
+    <environment>
+        <colourBackground b="0.050876" g="0.050876" r="0.050876"/>
+    </environment>
+</scene>

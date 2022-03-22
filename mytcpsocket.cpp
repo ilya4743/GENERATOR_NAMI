@@ -7,11 +7,13 @@
 MyTcpSocket::MyTcpSocket(QObject *parent) : QObject(parent)
 {
     delay_time=1000;
-    reconnect_time=5000;
 }
 
-void MyTcpSocket::doConnect()
+void MyTcpSocket::doConnect(const QString& IP, const int PORT, const int RECONNECT_TIME)
 {
+    this->IP=IP;
+    this->PORT=PORT;
+    reconnect_time=RECONNECT_TIME;
     qDebug() << "connecting...";
     socket = new QTcpSocket(this);
     connect(socket, SIGNAL(connected()),this, SLOT(connected()));
@@ -19,7 +21,7 @@ void MyTcpSocket::doConnect()
     connect(socket, SIGNAL(bytesWritten(qint64)),this, SLOT(bytesWritten(qint64)));
     connect(socket, SIGNAL(readyRead()),this, SLOT(readyReadNoSimulation()));
     connect(socket, SIGNAL(errorOccurred(QAbstractSocket::SocketError )),this,SLOT(Error(QAbstractSocket::SocketError)));
-    socket->connectToHost("localhost", 15555);
+    socket->connectToHost(IP, PORT);
 }
 
 void MyTcpSocket::connected()
@@ -34,7 +36,7 @@ void MyTcpSocket::disconnected()
 
 void MyTcpSocket::reconnect()
 {
-    socket->connectToHost("localhost", 15555);
+    socket->connectToHost(IP, PORT);
 }
 
 void MyTcpSocket::Error(QAbstractSocket::SocketError socketError)
@@ -162,12 +164,9 @@ void MyTcpSocket::auto_mode(bool isAuto)
 
 void MyTcpSocket::sendData(QByteArray& arr)
 {
-    //if(wnd->isMotionSimulation)
     wnd->countSendPack++;
     socket->write(arr);
     socket->flush();
-    //QString str=QTime::currentTime().toString("HH:mm:ss");
-    //qDebug()<<str;
     if(!wnd->isWaitBPR)
         delay(delay_time);
     //QTimer::singleShot(delay_time, this);

@@ -14,7 +14,7 @@ class MyTcpSocket : public QObject
 public:
     explicit MyTcpSocket(QObject *parent = 0);
     void sendData(QByteArray& arr);
-    void doConnect();
+    void doConnect(const QString& IP, const int PORT, const int RECONNECT_TIME);
 
 signals:
 
@@ -32,6 +32,8 @@ private:
     QTcpSocket *socket;
     int delay_time;
     int reconnect_time;
+    QString IP;
+    int PORT;
 public:
     MainWindow* wnd;
     bool auto_send;

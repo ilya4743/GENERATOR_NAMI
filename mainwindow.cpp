@@ -5,16 +5,19 @@
 #include<QFile>
 #include"mytcpsocket.h"
 #include <QFileDialog>
+#include "settings.h"
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow)
 {
+    QFile f("config.cfg");
+    f.open(QIODevice::ReadOnly);
+    Settings::setDefaults(f.readAll());
     socket=new MyTcpSocket();
-    socket->doConnect();
+    socket->doConnect(Settings::get(Settings::IP_SERVER).toString(),Settings::get(Settings::PORT).toInt(),Settings::get(Settings::RECONNECT_TIME).toInt());
     ui->setupUi(this);
     //QRegExp rx( "(?<!\d)-?\d*[.,]?\d+" );
     //QValidator *validator = new QRegExpValidator(rx, this);
     vector<QString> vec_str_param;
-    vector<QString> vec_str_data;
 
     //читаем наименование параметров
     QFile file1("param.txt");
@@ -30,19 +33,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
         file1.close();
     }
 
+    QString b("defaultValues.xml");
     //читаем значение параметров
-    QFile file2("data.txt");
-    if ((file2.exists())&&(file2.open(QIODevice::ReadOnly)))
-    {
-        QString str="";
-        while(!file2.atEnd())
-        {
-            str=str+file2.readLine();
-            vec_str_data.push_back(str);
-            str="";
-        }
-        file2.close();
-    }
+    XMLGenerator::importXML(b,map,car,goal_point,vec_barrier, countBarriers);
 
     //подставляем значение параметров в виджеты
     vec_line_edit.reserve(9);
@@ -51,25 +44,18 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     {
         vec_line_edit.push_back(new QLineEdit());
         vec_line_edit[i]->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-        vec_line_edit[i]->setText(vec_str_data[i]);
-
-        //this->vec_line_edit [i]->setValidator(validator);
         vec_label.push_back(new QLabel(vec_str_param[i]));
         ui->formLayout->addWidget(vec_label[i],i,0);
         vec_label[i]->setAlignment(Qt::AlignRight|Qt::AlignBottom);
-
         ui->formLayout->addWidget(vec_line_edit[i],i,1);
     }
     vec_line_edit.push_back(new QLineEdit());
     vec_line_edit[8]->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-    vec_line_edit[8]->setText(vec_str_data[8]);
     vec_label.push_back(new QLabel(vec_str_param[8]));
     ui->formLayout->addWidget(vec_label[8],8,0);
     vec_label[8]->setAlignment(Qt::AlignRight|Qt::AlignBottom);
 
     spinBoxN=new QSpinBox;
-    //spinBoxN->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-    spinBoxN->setValue(vec_str_data[8].toInt());
     ui->formLayout->addWidget(spinBoxN,8,1);
     connect(spinBoxN, SIGNAL(textChanged(const QString &)),this, SLOT(textChanged(const QString &)));
     //добавим comboBox для выбора положения center
@@ -86,9 +72,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     {
         vec_line_edit.push_back(new QLineEdit());
         vec_line_edit[i]->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-        vec_line_edit[i]->setText(vec_str_data[i]);
-
-        //this->vec_line_edit[i]->setValidator(validator);
         vec_label.push_back(new QLabel(vec_str_param[i]));
         ui->formLayout_4->addWidget(vec_label[i]);
         ui->formLayout_4->addRow(vec_label[i], vec_line_edit[i]);
@@ -111,9 +94,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     connect(vec_check_box[2],SIGNAL(stateChanged(int)),this,SLOT(loopSimulation(int)));
     connect(vec_check_box[3],SIGNAL(stateChanged(int)),this,SLOT(endlessSimulation(int)));
     connect(vec_check_box[4],SIGNAL(stateChanged(int)),this,SLOT(waitBPR(int)));
-    if(spinBoxN->value()==0)
-        for(unsigned int i=9; i<vec_str_param.size();i++)
-            vec_line_edit[i]->setEnabled(false);
 
     vec_line_edit.push_back(new QLineEdit());
     vec_line_edit[vec_line_edit.size()-1]->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
@@ -144,14 +124,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     isEndlessSimulation=false;
     isWaitBPR=true;
     stopSimulation=false;
-
-    map.width=vec_line_edit[0]->text().toFloat();
-    map.height=vec_line_edit[1]->text().toFloat();
-    map.step=vec_line_edit[2]->text().toFloat();
-    map.center=vec_line_edit[3]->text().toInt();
-
-    car.width=vec_line_edit[4]->text().toFloat();
-    car.height=vec_line_edit[5]->text().toFloat();
+    updateWidgets();
 }
 
 void MainWindow::waitBPR(int state)
@@ -165,7 +138,6 @@ void MainWindow::waitBPR(int state)
 void MainWindow::stopSimulationBtn_click()
 {
     stop_btn->setEnabled(false);
-    //socket->auto_mode(false);
     disconnect(socket->GetQTcpSocket(), SIGNAL(readyRead()),socket, SLOT(readyReadEndlessSimulation()));
     connect(socket->GetQTcpSocket(), SIGNAL(readyRead()),socket, SLOT(readyReadNoSimulation()));
     disconnect(socket->GetQTcpSocket(), SIGNAL(readyRead()),socket, SLOT(readyReadSimpleSimulation()));
@@ -385,42 +357,6 @@ void MainWindow::on_comboBox_currentIndexChanged(int index)
     vec_line_edit[12]->setText(QString::number(vec_barrier[index].height));
 }
 
-void MainWindow::on_action_triggered()
-{
-    QString str = QFileDialog::getOpenFileName(0, "Open Dialog", "sequences", "*.xml");
-    BarrierParser handler;
-    QFile file2(str);
-    if ((file2.exists())&&(file2.open(QIODevice::ReadOnly)))
-    {
-        QXmlInputSource source(&file2);
-        QXmlSimpleReader reader;
-        reader.setContentHandler(&handler);
-        reader.setErrorHandler(&handler);
-        if(reader.parse(source))
-        {
-            float x, y, width, height;
-            GameMap m;
-            Car c;
-            QDataStream stream(&handler.data, QIODevice::ReadOnly);
-            stream>>map;
-            stream>>car;
-            stream>>goal_point;
-            stream>>countBarriers;
-            vec_barrier.clear();
-            vec_barrier.reserve(countBarriers);
-            for(int j=0; j<countBarriers; j++)
-            {
-                stream>>x>>y;
-                stream.skipRawData(4);
-                stream>>width>>height;
-                stream.skipRawData(4);
-                vec_barrier.push_back(Barrier(x,y,width,height));
-            }
-        }
-    }
-    updateWidgets();
-}
-
 void MainWindow::updateWidgets()
 {
     vec_line_edit[0]->setText(QString::number(map.width));
@@ -622,52 +558,20 @@ void MainWindow::on_sendDataBtn_clicked()
 
 void MainWindow::on_SettingsBtn_triggered()
 {
-    //settings_wnd=new Settings();
-    //settings_wnd->show();
-    //Dialog *d=new Dialog();
-    //d->show();
+
+}
+
+void MainWindow::on_importSeq_triggered()
+{
+    QString str = QFileDialog::getOpenFileName(0, "Open Dialog", "sequences", "*.xml");
+    XMLGenerator::importXML(str,map,car,goal_point,vec_barrier, countBarriers);
+    updateWidgets();
 }
 
 
-void MainWindow::on_action_2_triggered()
+void MainWindow::on_exportSeq_triggered()
 {
     QString str = QFileDialog::getSaveFileName(this, tr("Сохранить файл"),"sequences",tr ("*.xml" ));
-    QFile file2(str);
-    if(file2.open(QIODevice::WriteOnly))
-    {
-        updateValues();
-        QXmlStreamWriter XMLWriter(&file2);
-        XMLWriter.setAutoFormatting(true);
-        XMLWriter.writeStartDocument();
-        XMLWriter.writeStartElement("scene");
-        XMLWriter.writeAttribute("author", "suvairin" );
-        XMLWriter.writeAttribute("formatVersion", "1.1");
-        GameMapXMLWriter mapXML;
-        mapXML.print(XMLWriter, map);
-        CarXMLWriter carXML;
-        carXML.print(XMLWriter, car);
-        XMLWriter.writeStartElement("Goal");
-        XMLWriter.writeAttribute("x", QString::number(goal_point.x));
-        XMLWriter.writeAttribute("y", QString::number(goal_point.y));
-        XMLWriter.writeEndElement();
-        XMLWriter.writeStartElement("CountBarriers");
-        XMLWriter.writeAttribute("n", QString::number(spinBoxN->value()));
-        XMLWriter.writeEndElement();
-        BarrierXMLWriter barrierXMLWriter;
-        for(int i=0; i<spinBoxN->value();i++)
-            barrierXMLWriter.print(XMLWriter, vec_barrier[i]);
-
-        XMLWriter.writeStartElement("externals");
-        XMLWriter.writeEndElement();
-        XMLWriter.writeStartElement("environment");
-        XMLWriter.writeStartElement("colourBackground");
-        XMLWriter.writeAttribute("b", "0.050876");
-        XMLWriter.writeAttribute("g", "0.050876");
-        XMLWriter.writeAttribute("r", "0.050876");
-        XMLWriter.writeEndElement();
-        XMLWriter.writeEndElement();
-
-        XMLWriter.writeEndElement();
-    }
-    file2.close();
+    updateValues();
+    XMLGenerator::exportXML(str,map,car,goal_point,vec_barrier);
 }

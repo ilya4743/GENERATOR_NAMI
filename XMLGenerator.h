@@ -1,0 +1,38 @@
+#ifndef XMLGENERATOR_H
+#define XMLGENERATOR_H
+
+#include<QXmlStreamWriter>
+#include <QXmlAttributes>
+#include <QXmlDefaultHandler>
+#include <QDataStream>
+#include <QDebug>
+#include "GameMap.h"
+#include "Car.h"
+#include "Barrier.h"
+#include "point.h"
+
+class GeneratorXMLParser : public QXmlDefaultHandler
+{
+private:
+    QString m_strText;
+    bool isCorrect=false;
+    QDataStream *dataStream;
+public:
+    QByteArray data;
+    GeneratorXMLParser();
+    ~GeneratorXMLParser();
+    bool startElement (const QString& namespaceURI, const QString& localName, const QString& name, const QXmlAttributes& attrs);
+    bool characters(const QString& strText);
+    bool endElement(const QString& namespaceURI, const QString& localName, const QString& qName);
+    bool fatalError (const QXmlParseException& exception);
+};
+
+class XMLGenerator
+{
+private:
+public:
+    static void exportXML(const QString& str, const GameMap& map, const Car& car, const Point& goal_point, const std::vector<Barrier>& vec_barrier);
+    static void importXML(QString& str, GameMap& map, Car& car, Point& goal_point, std::vector<Barrier>& vec_barrier, int& countBarriers);
+};
+
+#endif
