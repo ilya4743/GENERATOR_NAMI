@@ -3,7 +3,7 @@
     <GameMap width="11" height="10" step="1" center="104"/>
     <Car width="3" height="3"/>
     <Goal x="-5" y="10"/>
-    <CountBarriers n="7"/>
+    <CountBarriers n="9"/>
     <node name="Cube.0">
         <position x="0" y="3" z="0"/>
         <rotation qw="0" qx="0" qy="0" qz="0"/>
@@ -57,6 +57,22 @@
         <rotation qw="0" qx="0" qy="0" qz="0"/>
         <scale x="0" y="0" z="1"/>
         <entity meshFile="Cube.6.mesh" name="Cube.6">
+            <userData/>
+        </entity>
+            <node name="Cube.7">
+        <position x="10" y="10" z="20"/>
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
+        <scale x="0" y="0" z="1"/>
+        <entity meshFile="Cube.7.mesh" name="Cube.7">
+            <userData/>
+        </entity>
+    	</node>	
+    </node>
+	<node name="Cube.8">
+        <position x="0" y="0" z="0"/>
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
+        <scale x="0" y="0" z="1"/>
+        <entity meshFile="Cube.8.mesh" name="Cube.8">
             <userData/>
         </entity>
     </node>

@@ -14,48 +14,59 @@ GeneratorXMLParser::~GeneratorXMLParser()
 
 bool GeneratorXMLParser::startElement (const QString& namespaceURI, const QString& localName, const QString& name, const QXmlAttributes& attrs)
 {
-        if(name!="scene" && name!="node" && name!="rotation" && name!="entity" && name!="userData" && name !="externals" && name!="environment" && name!="colourBackground")
+    if(name=="node" && attrs.value(0)[0]=='C'&&attrs.value(0)[1]=='u'&&attrs.value(0)[2]=='b'&&attrs.value(0)[3]=='e')
+    {
+        ++countBracket;
+        return true;
+    }
+    else if(countBracket>0)
+    {
+        if(name=="position"&&isCorrect==false)
         {
-            if(name=="position"&&isCorrect==false)
-            {
-                if(attrs.qName(0)=='x' && attrs.qName(1)=='y' && attrs.qName(2)=='z')
-                {
-                    *dataStream<<attrs.value(0).toFloat()<<attrs.value(1).toFloat()<<attrs.value(2).toFloat();
-                    qDebug()<<attrs.value(0).toFloat()<<attrs.value(1).toFloat()<<attrs.value(2).toFloat();
-                    isCorrect=true;
-                    return true;
-                }
-            }
-            if( name=="scale"&&isCorrect==true)
+            if(attrs.qName(0)=='x' && attrs.qName(1)=='y' && attrs.qName(2)=='z')
             {
                 *dataStream<<attrs.value(0).toFloat()<<attrs.value(1).toFloat()<<attrs.value(2).toFloat();
                 qDebug()<<attrs.value(0).toFloat()<<attrs.value(1).toFloat()<<attrs.value(2).toFloat();
-                isCorrect=false;
+                isCorrect=true;
                 return true;
             }
-            if(name=="GameMap")
-            {
-                *dataStream<<attrs.value(0).toFloat()<<attrs.value(1).toFloat()<<attrs.value(2).toFloat()<<attrs.value(3).toInt();
-                return true;
-            }
-            if(name=="Car")
-            {
-                *dataStream<<attrs.value(0).toFloat()<<attrs.value(1).toFloat();
-                return true;
-            }
-            if(name=="CountBarriers")
-            {
-                *dataStream<<attrs.value(0).toInt();
-                return true;
-            }
-            if(name=="Goal")
-            {
-                *dataStream<<attrs.value(0).toFloat()<<attrs.value(1).toFloat();
-                return true;
-            }
-            return false;
         }
-        return true;
+        if( name=="scale"&&isCorrect==true)
+        {
+            *dataStream<<attrs.value(0).toFloat()<<attrs.value(1).toFloat()<<attrs.value(2).toFloat();
+            qDebug()<<attrs.value(0).toFloat()<<attrs.value(1).toFloat()<<attrs.value(2).toFloat();
+            isCorrect=false;
+            return true;
+        }
+        if(name=="rotation" || name=="entity" || name == "userData")
+            return true;
+        else
+            return false;
+    }
+    else
+    {
+        if(name=="GameMap")
+        {
+            *dataStream<<attrs.value(0).toFloat()<<attrs.value(1).toFloat()<<attrs.value(2).toFloat()<<attrs.value(3).toInt();
+            return true;
+        }
+        if(name=="Car")
+        {
+            *dataStream<<attrs.value(0).toFloat()<<attrs.value(1).toFloat();
+            return true;
+        }
+        if(name=="CountBarriers")
+        {
+            *dataStream<<attrs.value(0).toInt();
+            return true;
+        }
+        if(name=="Goal")
+        {
+            *dataStream<<attrs.value(0).toFloat()<<attrs.value(1).toFloat();
+            return true;
+        }
+    }
+    return true;
 }
 
 bool GeneratorXMLParser::characters(const QString& strText)
@@ -66,10 +77,8 @@ bool GeneratorXMLParser::characters(const QString& strText)
 
 bool GeneratorXMLParser::endElement(const QString& namespaceURI, const QString& localName, const QString& qName)
 {
-    if(qName!="contact"&&qName!="addressbook")
-    {
-        qDebug()<<"TagName:"<<qName<<"\tText:"<<m_strText;
-    }
+    if(qName=="node")
+        --countBracket;
     return true;
 }
 
@@ -142,7 +151,7 @@ void XMLGenerator::importXML(QString& str, GameMap& map, Car& car, Point& goal_p
             stream>>countBarriers;
             vec_barrier.clear();
             vec_barrier.reserve(countBarriers);
-            for(int j=0; j<countBarriers; j++)
+            while(!stream.atEnd())
             {
                 stream>>x>>y;
                 stream.skipRawData(4);

@@ -17,6 +17,7 @@ private:
     QString m_strText;
     bool isCorrect=false;
     QDataStream *dataStream;
+    unsigned int countBracket=0;
 public:
     QByteArray data;
     GeneratorXMLParser();
