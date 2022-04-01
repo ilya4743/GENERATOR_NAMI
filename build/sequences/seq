@@ -3,7 +3,7 @@
     <GameMap width="11" height="10" step="1" center="104"/>
     <Car width="3" height="3"/>
     <Goal x="-5" y="10"/>
-    <CountBarriers n="9"/>
+    <CountBarriers n="10"/>
     <node name="Cube.0">
         <position x="0" y="3" z="0"/>
         <rotation qw="0" qx="0" qy="0" qz="0"/>
@@ -35,30 +35,22 @@
         <entity meshFile="Cube.3.mesh" name="Cube.3">
             <userData/>
         </entity>
-	<node name="Cube.4">
-		<position x="0" y="0" z="0"/>
-		<rotation qw="0" qx="0" qy="0" qz="0"/>
-		<scale x="0" y="0" z="1"/>
-		<entity meshFile="Cube.4.mesh" name="Cube.4">
-		    <userData/>
-		</entity>
-    	</node>
-    	    <node name="Cube.5">
+    </node>
+    <node name="Cube.4">
+        <position x="0" y="0" z="0"/>
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
+        <scale x="0" y="0" z="1"/>
+        <entity meshFile="Cube.4.mesh" name="Cube.4">
+            <userData/>
+        </entity>
+    </node>
+    <node name="Cube.5">
         <position x="0" y="0" z="0"/>
         <rotation qw="0" qx="0" qy="0" qz="0"/>
         <scale x="0" y="0" z="1"/>
         <entity meshFile="Cube.5.mesh" name="Cube.5">
             <userData/>
         </entity>
-    </node>
-        <node name="Cube.5">
-        <position x="0" y="0" z="0"/>
-        <rotation qw="0" qx="0" qy="0" qz="0"/>
-        <scale x="0" y="0" z="1"/>
-        <entity meshFile="Cube.5.mesh" name="Cube.5">
-            <userData/>
-        </entity>
-    </node>
     </node>
     <node name="Cube.6">
         <position x="0" y="0" z="0"/>
@@ -67,20 +59,28 @@
         <entity meshFile="Cube.6.mesh" name="Cube.6">
             <userData/>
         </entity>
-            <node name="Cube.7">
-        <position x="10" y="10" z="20"/>
+    </node>
+    <node name="Cube.7">
+        <position x="0" y="0" z="0"/>
         <rotation qw="0" qx="0" qy="0" qz="0"/>
         <scale x="0" y="0" z="1"/>
         <entity meshFile="Cube.7.mesh" name="Cube.7">
             <userData/>
         </entity>
-    	</node>	
     </node>
-	<node name="Cube.8">
-        <position x="0" y="0" z="0"/>
+    <node name="Cube.8">
+        <position x="10" y="10" z="0"/>
         <rotation qw="0" qx="0" qy="0" qz="0"/>
         <scale x="0" y="0" z="1"/>
         <entity meshFile="Cube.8.mesh" name="Cube.8">
+            <userData/>
+        </entity>
+    </node>
+    <node name="Cube.9">
+        <position x="0" y="0" z="0"/>
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
+        <scale x="0" y="0" z="1"/>
+        <entity meshFile="Cube.9.mesh" name="Cube.9">
             <userData/>
         </entity>
     </node>

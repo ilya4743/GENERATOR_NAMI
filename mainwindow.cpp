@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 
     QString b("defaultValues.xml");
     //читаем значение параметров
+    countBarriers=0;
     XMLGenerator::importXML(b,map,car,goal_point,vec_barrier, countBarriers);
 
     //подставляем значение параметров в виджеты
@@ -564,6 +565,7 @@ void MainWindow::on_SettingsBtn_triggered()
 void MainWindow::on_importSeq_triggered()
 {
     QString str = QFileDialog::getOpenFileName(0, "Open Dialog", "sequences", "*.xml");
+    countBarriers=0;
     XMLGenerator::importXML(str,map,car,goal_point,vec_barrier, countBarriers);
     updateWidgets();
 }

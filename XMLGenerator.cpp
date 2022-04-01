@@ -21,48 +21,41 @@ bool GeneratorXMLParser::startElement (const QString& namespaceURI, const QStrin
     }
     else if(countBracket>0)
     {
-        if(name=="position"&&isCorrect==false)
+        if(name=="position")
         {
             if(attrs.qName(0)=='x' && attrs.qName(1)=='y' && attrs.qName(2)=='z')
             {
                 *dataStream<<attrs.value(0).toFloat()<<attrs.value(1).toFloat()<<attrs.value(2).toFloat();
-                qDebug()<<attrs.value(0).toFloat()<<attrs.value(1).toFloat()<<attrs.value(2).toFloat();
-                isCorrect=true;
+                pos++;
                 return true;
             }
         }
-        if( name=="scale"&&isCorrect==true)
+        if( name=="scale")
         {
             *dataStream<<attrs.value(0).toFloat()<<attrs.value(1).toFloat()<<attrs.value(2).toFloat();
-            qDebug()<<attrs.value(0).toFloat()<<attrs.value(1).toFloat()<<attrs.value(2).toFloat();
-            isCorrect=false;
+            scale++;
             return true;
         }
-        if(name=="rotation" || name=="entity" || name == "userData")
             return true;
-        else
-            return false;
     }
     else
     {
         if(name=="GameMap")
         {
             *dataStream<<attrs.value(0).toFloat()<<attrs.value(1).toFloat()<<attrs.value(2).toFloat()<<attrs.value(3).toInt();
+            isMap=true;
             return true;
         }
         if(name=="Car")
         {
             *dataStream<<attrs.value(0).toFloat()<<attrs.value(1).toFloat();
-            return true;
-        }
-        if(name=="CountBarriers")
-        {
-            *dataStream<<attrs.value(0).toInt();
+            isCar=true;
             return true;
         }
         if(name=="Goal")
         {
             *dataStream<<attrs.value(0).toFloat()<<attrs.value(1).toFloat();
+            isGoal=true;
             return true;
         }
     }
@@ -77,8 +70,15 @@ bool GeneratorXMLParser::characters(const QString& strText)
 
 bool GeneratorXMLParser::endElement(const QString& namespaceURI, const QString& localName, const QString& qName)
 {
-    if(qName=="node")
+    if(qName=="node"&&countBracket>0)
+    {
         --countBracket;
+        int pos1=pos;
+        int scale1=scale;
+        pos--;
+        scale--;
+        return (pos1==scale1&&(pos1!=0&&scale1!=0));
+    }
     return true;
 }
 
@@ -86,6 +86,11 @@ bool GeneratorXMLParser::fatalError (const QXmlParseException& exception)
 {
     qDebug()<<"Line: "<<exception.lineNumber()<<", Column:"<<exception.columnNumber()<<", Message:"<<exception.message();
     return false;
+}
+
+bool GeneratorXMLParser::endDocument()
+{
+    return isGoal&&isMap&&isCar;
 }
 
 void XMLGenerator::exportXML(const QString& str, const GameMap& map, const Car& car, const Point& goal_point, const std::vector<Barrier>& vec_barrier)
@@ -148,9 +153,7 @@ void XMLGenerator::importXML(QString& str, GameMap& map, Car& car, Point& goal_p
             stream>>map;
             stream>>car;
             stream>>goal_point;
-            stream>>countBarriers;
             vec_barrier.clear();
-            vec_barrier.reserve(countBarriers);
             while(!stream.atEnd())
             {
                 stream>>x>>y;
@@ -158,6 +161,7 @@ void XMLGenerator::importXML(QString& str, GameMap& map, Car& car, Point& goal_p
                 stream>>width>>height;
                 stream.skipRawData(4);
                 vec_barrier.push_back(Barrier(x,y,width,height));
+                ++countBarriers;
             }
         }
     }

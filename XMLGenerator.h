@@ -18,6 +18,13 @@ private:
     bool isCorrect=false;
     QDataStream *dataStream;
     unsigned int countBracket=0;
+    bool isCar=false;
+    bool isMap=false;
+    bool isGoal=false;
+    bool isPosition=false;
+    bool isScale=false;
+    int pos=0;
+    int scale=0;
 public:
     QByteArray data;
     GeneratorXMLParser();
@@ -26,6 +33,7 @@ public:
     bool characters(const QString& strText);
     bool endElement(const QString& namespaceURI, const QString& localName, const QString& qName);
     bool fatalError (const QXmlParseException& exception);
+    bool endDocument();
 };
 
 class XMLGenerator
