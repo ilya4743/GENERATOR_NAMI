@@ -16,6 +16,7 @@
 #include "GameMap.h"
 #include "Car.h"
 #include "XMLGenerator.h"
+#include "Visualizer.h"
 
 using namespace std;
 QT_BEGIN_NAMESPACE
@@ -56,7 +57,7 @@ private slots:
     void on_SettingsBtn_triggered();
     void on_importSeq_triggered();
     void on_exportSeq_triggered();
-
+    void smoothPath(int state);
 private:
     int ind;
     vector<QLineEdit*> vec_line_edit;
@@ -88,8 +89,10 @@ public:
     bool isEndlessSimulation;
     bool isWaitBPR;
     bool stopSimulation;
+    bool isSmoothing;
     Car car;
     GameMap map;
     int countBarriers;
+    Visualizer* window;
 };
 #endif // MAINWINDOW_H

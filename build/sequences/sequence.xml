@@ -1,86 +1,86 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scene author="suvairin" formatVersion="1.1">
-    <GameMap width="11" height="10" step="1" center="104"/>
+    <GameMap width="100" height="271" step="1" center="27050"/>
     <Car width="3" height="3"/>
-    <Goal x="-5" y="10"/>
-    <CountBarriers n="9"/>
+    <Goal x="0" y="270"/>
+    <CountBarriers n="10"/>
     <node name="Cube.0">
-        <position x="0" y="3" z="0"/>
+        <position x="20" y="30" z="0"/>
         <rotation qw="0" qx="0" qy="0" qz="0"/>
-        <scale x="1" y="1" z="1"/>
+        <scale x="10" y="10" z="1"/>
         <entity meshFile="Cube.0.mesh" name="Cube.0">
             <userData/>
         </entity>
     </node>
     <node name="Cube.1">
-        <position x="0" y="6" z="0"/>
+        <position x="30" y="60" z="0"/>
         <rotation qw="0" qx="0" qy="0" qz="0"/>
-        <scale x="1" y="1" z="1"/>
+        <scale x="10" y="10" z="1"/>
         <entity meshFile="Cube.1.mesh" name="Cube.1">
             <userData/>
         </entity>
     </node>
     <node name="Cube.2">
-        <position x="-2" y="8" z="0"/>
+        <position x="-2" y="80" z="0"/>
         <rotation qw="0" qx="0" qy="0" qz="0"/>
-        <scale x="1" y="1" z="1"/>
+        <scale x="10" y="10" z="1"/>
         <entity meshFile="Cube.2.mesh" name="Cube.2">
             <userData/>
         </entity>
     </node>
     <node name="Cube.3">
-        <position x="0" y="0" z="0"/>
+        <position x="0" y="100" z="0"/>
         <rotation qw="0" qx="0" qy="0" qz="0"/>
-        <scale x="0" y="0" z="1"/>
+        <scale x="10" y="10" z="1"/>
         <entity meshFile="Cube.3.mesh" name="Cube.3">
             <userData/>
         </entity>
-	<node name="Cube.4">
-		<position x="0" y="0" z="0"/>
-		<rotation qw="0" qx="0" qy="0" qz="0"/>
-		<scale x="0" y="0" z="1"/>
-		<entity meshFile="Cube.4.mesh" name="Cube.4">
-		    <userData/>
-		</entity>
-    	</node>
-    	    <node name="Cube.5">
-        <position x="0" y="0" z="0"/>
+    </node>
+    <node name="Cube.4">
+        <position x="20" y="120" z="0"/>
         <rotation qw="0" qx="0" qy="0" qz="0"/>
-        <scale x="0" y="0" z="1"/>
-        <entity meshFile="Cube.5.mesh" name="Cube.5">
+        <scale x="20" y="20" z="1"/>
+        <entity meshFile="Cube.4.mesh" name="Cube.4">
             <userData/>
         </entity>
     </node>
-        <node name="Cube.5">
-        <position x="0" y="0" z="0"/>
+    <node name="Cube.5">
+        <position x="-50" y="180" z="0"/>
         <rotation qw="0" qx="0" qy="0" qz="0"/>
-        <scale x="0" y="0" z="1"/>
+        <scale x="40" y="40" z="1"/>
         <entity meshFile="Cube.5.mesh" name="Cube.5">
             <userData/>
         </entity>
-    </node>
     </node>
     <node name="Cube.6">
-        <position x="0" y="0" z="0"/>
+        <position x="-5" y="170" z="0"/>
         <rotation qw="0" qx="0" qy="0" qz="0"/>
-        <scale x="0" y="0" z="1"/>
+        <scale x="15" y="15" z="1"/>
         <entity meshFile="Cube.6.mesh" name="Cube.6">
             <userData/>
         </entity>
-            <node name="Cube.7">
-        <position x="10" y="10" z="20"/>
+    </node>
+    <node name="Cube.7">
+        <position x="15" y="200" z="0"/>
         <rotation qw="0" qx="0" qy="0" qz="0"/>
-        <scale x="0" y="0" z="1"/>
+        <scale x="22" y="8" z="1"/>
         <entity meshFile="Cube.7.mesh" name="Cube.7">
             <userData/>
         </entity>
-    	</node>	
     </node>
-	<node name="Cube.8">
-        <position x="0" y="0" z="0"/>
+    <node name="Cube.8">
+        <position x="10" y="220" z="0"/>
         <rotation qw="0" qx="0" qy="0" qz="0"/>
-        <scale x="0" y="0" z="1"/>
+        <scale x="60" y="20" z="1"/>
         <entity meshFile="Cube.8.mesh" name="Cube.8">
+            <userData/>
+        </entity>
+    </node>
+    <node name="Cube.9">
+        <position x="-30" y="250" z="0"/>
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
+        <scale x="10" y="10" z="1"/>
+        <entity meshFile="Cube.9.mesh" name="Cube.9">
             <userData/>
         </entity>
     </node>

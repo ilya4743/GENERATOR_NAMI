@@ -61,12 +61,16 @@ void MyTcpSocket::readyReadNoSimulation()
     in>>b1>>b2;
     int n;
     in>>n;
+    std::vector<std::pair<float,float>> path;
     if(b1==0x44&&b2==0x48)
         while(socket->bytesAvailable())
         {
             in>>x>>y;
-            //qDebug()<<x<<'\t'<<y;
+            path.push_back(std::pair<float,float>(x,y));
+            qDebug()<<x<<'\t'<<y;
         }
+    wnd->window->setPath(path);
+    wnd->window->paintPath();
 }
 
 void delay(const int ms)
@@ -120,14 +124,13 @@ void MyTcpSocket::readyReadSimpleSimulation()
     float x=-100,y=-100;
     unsigned char b1, b2;
     in>>b1>>b2;
-
     if(b1==0x44&&b2==0x48)
     {
         wnd->countReceivePack++;
         int n;
         in>>n;
         in>>x>>y;
-        //qDebug()<<x<<y;
+        qDebug()<<x<<y;
         if(!(x==0&&y==0))
         {
             wnd->recalculateBarrier(Point (x,y));
@@ -152,7 +155,6 @@ void MyTcpSocket::readyReadSimpleSimulation()
             }
             //else
         }
-
     }
     socket->readAll();
 }
@@ -170,5 +172,16 @@ void MyTcpSocket::sendData(QByteArray& arr)
     if(!wnd->isWaitBPR)
         delay(delay_time);
     //QTimer::singleShot(delay_time, this);
+}
 
+void MyTcpSocket::changeModeBPR(bool isSmoothing)
+{
+    QByteArray arr1;
+    QDataStream stream(&arr1, QIODevice::WriteOnly);
+    stream.setFloatingPointPrecision(QDataStream::SinglePrecision);
+    stream.setByteOrder(QDataStream::LittleEndian);
+    stream<<(unsigned char)0x44<<(unsigned char)0x48;
+    stream<<isSmoothing;
+    socket->write(arr1);
+    socket->flush();
 }

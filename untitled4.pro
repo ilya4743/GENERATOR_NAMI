@@ -1,6 +1,7 @@
 QT = gui
 QT += network
 QT += xml
+QT       += opengl
 
 CONFIG += c++11 console
 CONFIG -= app_bundle
@@ -13,6 +14,7 @@ SOURCES += \
         Barrier.cpp \
         Car.cpp \
         GameMap.cpp \
+        Visualizer.cpp \
         XMLGenerator.cpp \
         main.cpp \
         mainwindow.cpp \
@@ -30,12 +32,17 @@ HEADERS += \
     Barrier.h \
     Car.h \
     GameMap.h \
+    Visualizer.h \
     XMLGenerator.h \
     mainwindow.h \
     mytcpserver.h \
     mytcpsocket.h \
     point.h \
     settings.h
+
+LIBS += -lOpenGL -lGLU
+
+target.path = $$[QT_INSTALL_EXAMPLES]/opengl/2dpainting
 
 FORMS += \
     mainwindow.ui

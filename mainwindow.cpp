@@ -91,6 +91,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     vec_check_box[2]->setEnabled(false);
     vec_check_box[3]->setEnabled(false);
     vec_check_box[4]->setEnabled(false);
+    connect(vec_check_box[0],SIGNAL(stateChanged(int)),this,SLOT(smoothPath(int)));
     connect(vec_check_box[1],SIGNAL(stateChanged(int)),this,SLOT(motionSimulation(int)));
     connect(vec_check_box[2],SIGNAL(stateChanged(int)),this,SLOT(loopSimulation(int)));
     connect(vec_check_box[3],SIGNAL(stateChanged(int)),this,SLOT(endlessSimulation(int)));
@@ -125,7 +126,11 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     isEndlessSimulation=false;
     isWaitBPR=true;
     stopSimulation=false;
+    isSmoothing=false;
     updateWidgets();
+    window=new Visualizer;
+    window->setWindowTitle("Visualizer");
+    window->setGeometry(100,100,500,500); // Смещение и положение окна
 }
 
 void MainWindow::waitBPR(int state)
@@ -210,6 +215,15 @@ void MainWindow::motionSimulation(int state)
     }
 }
 
+void MainWindow::smoothPath(int state)
+{
+    if(state==2)
+        isSmoothing=true;
+    else if(state==0)
+        isSmoothing=false;
+    socket->changeModeBPR(isSmoothing);
+}
+
 void MainWindow::textChanged1(const QString &s)
 {
     int width, height;
@@ -247,6 +261,8 @@ void MainWindow::textChanged1(const QString &s)
 void MainWindow::currentIndexCenterChanged(int index)
 {
     int width, height;
+    map.width=vec_line_edit[0]->text().toInt();
+    map.height=vec_line_edit[1]->text().toInt();
     width=map.width/map.step;
     height=map.height/map.step;
     switch(index)
@@ -342,6 +358,8 @@ MainWindow::~MainWindow()
     vec_check_box.clear();
     delete stop_btn;
     delete spinBoxN;
+
+    delete window;
 }
 
 
@@ -554,6 +572,9 @@ void MainWindow::on_sendDataBtn_clicked()
             makePack();
         }
     }
+    //window->setBarriers(vec_buf_barrier);
+    //window->setCar(car);
+    //window->show();
 }
 
 

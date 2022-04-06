@@ -15,7 +15,7 @@ public:
     explicit MyTcpSocket(QObject *parent = 0);
     void sendData(QByteArray& arr);
     void doConnect(const QString& IP, const int PORT, const int RECONNECT_TIME);
-
+    void changeModeBPR(bool isSmoothing);
 signals:
 
 public slots:
