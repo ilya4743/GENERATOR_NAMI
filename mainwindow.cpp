@@ -124,7 +124,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     isMotionSimulation=false;
     isLoopSimulation=false;
     isEndlessSimulation=false;
-    isWaitBPR=true;
+    isWaitBPR=false;
     stopSimulation=false;
     isSmoothing=false;
     updateWidgets();
@@ -186,23 +186,18 @@ void MainWindow::motionSimulation(int state)
     if(state==2)
     {
         isMotionSimulation=true;
-        //socket->auto_mode(true);
         socket->wnd=this;
         vec_check_box[2]->setEnabled(true);
         vec_check_box[3]->setEnabled(true);
         vec_check_box[4]->setEnabled(true);
         vec_line_edit[vec_line_edit.size()-1]->setEnabled(true);
         vec_label[vec_label.size()-1]->setEnabled(true);
-
         disconnect(socket->GetQTcpSocket(), SIGNAL(readyRead()),socket, SLOT(readyReadNoSimulation()));
         connect(socket->GetQTcpSocket(), SIGNAL(readyRead()),socket, SLOT(readyReadSimpleSimulation()));
-
-
     }
     else if(state==0)
     {
         isMotionSimulation=false;
-        //socket->auto_mode(false);
         vec_check_box[2]->setEnabled(false);
         vec_check_box[2]->setCheckState(Qt::CheckState::Unchecked);
         vec_check_box[3]->setEnabled(false);
@@ -572,9 +567,12 @@ void MainWindow::on_sendDataBtn_clicked()
             makePack();
         }
     }
-    //window->setBarriers(vec_buf_barrier);
-    //window->setCar(car);
-    //window->show();
+    if(isSmoothing)
+    {
+        window->setBarriers(vec_buf_barrier);
+        window->setCar(car);
+        window->show();
+    }
 }
 
 
