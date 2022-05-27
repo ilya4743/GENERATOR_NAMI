@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scene author="suvairin" formatVersion="1.1">
     <GameMap width="11" height="10" step="1" center="22"/>
-    <сar>
+    <сar speed="0">
         <scale x="22" y="33" z="0"/>
-        <rotation qw="0" qx="0" qy="0" qz="0"/> speed="0"
+        <rotation qw="0" qx="0" qy="0" qz="0"/>
     </сar>
-    <Goal x="4" y="5"/>
+    <Goal x="6" y="7"/>
     <CountBarriers n="1"/>
     <node name="Cube.0">
-        <position x="6" y="7" z="0" w="0"/>
+        <position x="8" y="9" z="0" w="0"/>
         <rotation qw="0" qx="0" qy="0" qz="0"/>
-        <scale x="8" y="9" z="0"/>
+        <scale x="1" y="2" z="0"/>
         <entity meshFile="Cube.0.mesh" name="Cube.0">
             <userData/>
         </entity>

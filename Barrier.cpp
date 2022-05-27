@@ -4,10 +4,8 @@ QDataStream& operator <<(QDataStream &out, const Barrier &b)
 {
     out.setFloatingPointPrecision(QDataStream::FloatingPointPrecision());
     out.setByteOrder(QDataStream::LittleEndian);
-    out << b.x;
-    out << b.y;
-    out << b.width;
-    out << b.height;
+    out << b.position;
+    out << b.scale;
     return out;
 }
 
@@ -15,10 +13,8 @@ QDataStream& operator >>(QDataStream &in, Barrier &b)
 {
     in.setFloatingPointPrecision(QDataStream::FloatingPointPrecision());
     in.setByteOrder(QDataStream::LittleEndian);
-    in >> b.x;
-    in >> b.y;
-    in >> b.width;
-    in >> b.height;
+    in >> b.position;
+    in >> b.scale;
     return in;
 }
 
@@ -28,9 +24,10 @@ void BarrierXMLWriter::print(QXmlStreamWriter& XMLWriter, const Barrier& barrier
     XMLWriter.writeAttribute("name", "Cube." + QString::number(countBarrier));
 
     XMLWriter.writeStartElement("position");
-    XMLWriter.writeAttribute("x",QString::number(barrier.x));
-    XMLWriter.writeAttribute("y",QString::number(barrier.y));
-    XMLWriter.writeAttribute("z","0" );
+    XMLWriter.writeAttribute("x",QString::number(barrier.position.x));
+    XMLWriter.writeAttribute("y",QString::number(barrier.position.y));
+    XMLWriter.writeAttribute("z",QString::number(barrier.position.z));
+    XMLWriter.writeAttribute("w",QString::number(barrier.position.w));
     XMLWriter.writeEndElement();
 
     XMLWriter.writeStartElement("rotation");
@@ -41,9 +38,9 @@ void BarrierXMLWriter::print(QXmlStreamWriter& XMLWriter, const Barrier& barrier
     XMLWriter.writeEndElement();
 
     XMLWriter.writeStartElement("scale");
-    XMLWriter.writeAttribute("x",QString::number(barrier.width));
-    XMLWriter.writeAttribute("y",QString::number(barrier.height));
-    XMLWriter.writeAttribute("z","1" );
+    XMLWriter.writeAttribute("x",QString::number(barrier.scale.x));
+    XMLWriter.writeAttribute("y",QString::number(barrier.scale.y));
+    XMLWriter.writeAttribute("z",QString::number(barrier.scale.z));
     XMLWriter.writeEndElement();
 
     XMLWriter.writeStartElement("entity");

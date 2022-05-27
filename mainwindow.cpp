@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     QString b("defaultValues.xml");
     //читаем значение параметров
     countBarriers=0;
-    XMLGenerator::importXML(b,map,car,goal_point,vec_barrier, countBarriers);
+    //XMLGenerator::importXML(b,map,car,goal_point,vec_barrier, countBarriers);
 
     //подставляем значение параметров в виджеты
     vec_line_edit.reserve(9);
@@ -301,22 +301,22 @@ void MainWindow::currentIndexCenterChanged(int index)
 
 void MainWindow::textChangedBarrier1(const QString &arg1)
 {
-    vec_barrier[ui->comboBox->currentIndex()].x=arg1.toFloat();
+    vec_barrier[ui->comboBox->currentIndex()].position.x=arg1.toFloat();
 }
 
 void MainWindow::textChangedBarrier2(const QString &arg1)
 {
-    vec_barrier[ui->comboBox->currentIndex()].y=arg1.toFloat();
+    vec_barrier[ui->comboBox->currentIndex()].position.y=arg1.toFloat();
 }
 
 void MainWindow::textChangedBarrier3(const QString &arg1)
 {
-    vec_barrier[ui->comboBox->currentIndex()].width=arg1.toFloat();
+    vec_barrier[ui->comboBox->currentIndex()].scale.x=arg1.toFloat();
 }
 
 void MainWindow::textChangedBarrier4(const QString &arg1)
 {
-    vec_barrier[ui->comboBox->currentIndex()].height=arg1.toFloat();
+    vec_barrier[ui->comboBox->currentIndex()].scale.y=arg1.toFloat();
 }
 
 void MainWindow::textChanged(const QString &arg1)
@@ -365,10 +365,10 @@ void MainWindow::on_ExitBtn_triggered()
 
 void MainWindow::on_comboBox_currentIndexChanged(int index)
 {
-    vec_line_edit[9] ->setText(QString::number(vec_barrier[index].x));
-    vec_line_edit[10]->setText(QString::number(vec_barrier[index].y));
-    vec_line_edit[11]->setText(QString::number(vec_barrier[index].width));
-    vec_line_edit[12]->setText(QString::number(vec_barrier[index].height));
+    vec_line_edit[9] ->setText(QString::number(vec_barrier[index].position.x));
+    vec_line_edit[10]->setText(QString::number(vec_barrier[index].position.y));
+    vec_line_edit[11]->setText(QString::number(vec_barrier[index].scale.x));
+    vec_line_edit[12]->setText(QString::number(vec_barrier[index].scale.y));
 }
 
 void MainWindow::updateWidgets()
@@ -378,8 +378,8 @@ void MainWindow::updateWidgets()
     vec_line_edit[2]->setText(QString::number(map.step));
     vec_line_edit[3]->setText(QString::number(map.center));
 
-    vec_line_edit[4]->setText(QString::number(car.width));
-    vec_line_edit[5]->setText(QString::number(car.height));
+    vec_line_edit[4]->setText(QString::number(car.scale.x));
+    vec_line_edit[5]->setText(QString::number(car.scale.y));
 
     vec_line_edit[6]->setText(QString::number(goal_point.x));
     vec_line_edit[7]->setText(QString::number(goal_point.y));
@@ -392,10 +392,10 @@ void MainWindow::updateWidgets()
 
     if(countBarriers>0)
     {
-        vec_line_edit[9] ->setText(QString::number(vec_barrier[0].x));
-        vec_line_edit[10]->setText(QString::number(vec_barrier[0].y));
-        vec_line_edit[11]->setText(QString::number(vec_barrier[0].width));
-        vec_line_edit[12]->setText(QString::number(vec_barrier[0].height));
+        vec_line_edit[9] ->setText(QString::number(vec_barrier[0].position.x));
+        vec_line_edit[10]->setText(QString::number(vec_barrier[0].position.y));
+        vec_line_edit[11]->setText(QString::number(vec_barrier[0].scale.x));
+        vec_line_edit[12]->setText(QString::number(vec_barrier[0].scale.y));
     }
 }
 
@@ -406,8 +406,8 @@ void MainWindow::updateValues()
     map.step=vec_line_edit[2]->text().toFloat();
     map.center=vec_line_edit[3]->text().toInt();
 
-    car.width=vec_line_edit[4]->text().toFloat();
-    car.height=vec_line_edit[5]->text().toFloat();
+    car.scale.x=vec_line_edit[4]->text().toFloat();
+    car.scale.y=vec_line_edit[5]->text().toFloat();
 
     goal_point.x=vec_line_edit[6]->text().toFloat();
     goal_point.y=vec_line_edit[7]->text().toFloat();
@@ -422,8 +422,8 @@ void MainWindow::recalculateBarrier(Point p)
 {
     for(unsigned int i=0; i<vec_buf_barrier.size();i++)
     {
-        vec_buf_barrier[i].x=vec_buf_barrier[i].x-p.x;
-        vec_buf_barrier[i].y=vec_buf_barrier[i].y-p.y;
+        vec_buf_barrier[i].position.x=vec_buf_barrier[i].position.x-p.x;
+        vec_buf_barrier[i].position.y=vec_buf_barrier[i].position.y-p.y;
     }
 }
 
@@ -446,7 +446,7 @@ void MainWindow::makePack()
     dataStream.setByteOrder(QDataStream::LittleEndian);
     dataStream<<(unsigned char)0x44<<(unsigned char)0x47;
     dataStream<<map<<car;
-    dataStream<<goal_point_buf.x<<goal_point_buf.y;
+    dataStream<<goal_point_buf;
     dataStream<<spinBoxN->value();
     for(unsigned int i=0; i<vec_buf_barrier.size();i++)
         dataStream<<vec_buf_barrier[i];
@@ -494,8 +494,8 @@ void MainWindow::on_sendDataBtn_clicked()
                 int min=+100;
                 for(unsigned int i=0; i<vec_barrier.size(); i++)
                 {
-                    Point left_top(vec_barrier[i].x-vec_barrier[i].width/2,vec_barrier[i].y+vec_barrier[i].height/2);
-                    Point right_bottom(vec_barrier[i].x+vec_barrier[i].width/2,vec_barrier[i].y-vec_barrier[i].height/2);
+                    Point left_top(vec_barrier[i].position.x-vec_barrier[i].scale.x/2,vec_barrier[i].position.y+vec_barrier[i].scale.y/2);
+                    Point right_bottom(vec_barrier[i].position.x+vec_barrier[i].scale.x/2,vec_barrier[i].position.y-vec_barrier[i].scale.y/2);
 
                     if (abs(left_top.x) > abs(int(left_top.x / map.step) * map.step))
                         left_top.x -= abs(left_top.x - int(left_top.x / map.step) * map.step);
@@ -542,8 +542,8 @@ void MainWindow::on_sendDataBtn_clicked()
                     int min=+100;
                     for(unsigned int i=0; i<vec_barrier.size(); i++)
                     {
-                        Point left_top(vec_barrier[i].x-vec_barrier[i].width/2,vec_barrier[i].y+vec_barrier[i].height/2);
-                        Point right_bottom(vec_barrier[i].x+vec_barrier[i].width/2,vec_barrier[i].y-vec_barrier[i].height/2);
+                        Point left_top(vec_barrier[i].position.x-vec_barrier[i].scale.x/2,vec_barrier[i].position.y+vec_barrier[i].scale.y/2);
+                        Point right_bottom(vec_barrier[i].position.x+vec_barrier[i].scale.x/2,vec_barrier[i].position.y-vec_barrier[i].scale.y/2);
 
                         if (abs(left_top.x) > abs(int(left_top.x / map.step) * map.step))
                             left_top.x -= abs(left_top.x - int(left_top.x / map.step) * map.step);

@@ -18,7 +18,7 @@ public:
     GameMap(const GameMap& map):width(map.width),height(map.height),step(map.step),center(map.center){}
     ~GameMap(){}
     friend QDataStream& operator <<(QDataStream &out, const GameMap &map);
-    friend QDataStream& operator >>(QDataStream &in, GameMap &map);
+    friend QDataStream& operator >>(QDataStream &in, GameMap &map);    
 };
 
 class GameMapXMLWriter

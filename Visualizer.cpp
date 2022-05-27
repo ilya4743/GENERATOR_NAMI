@@ -80,7 +80,7 @@ void Visualizer::paintGL()
     glMatrixMode(GL_PROJECTION); // устанавливаем матрицу
     glLoadIdentity(); // загружаем матрицу
     glOrtho(0,wax,way,0,1,0); // подготавливаем плоскости для матрицы
-    if(path.size()>0)
+    if(path.size()>2)
     {
         glBegin(GL_LINE_STRIP);
         glColor3f(1,1,1);

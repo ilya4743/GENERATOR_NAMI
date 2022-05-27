@@ -3,18 +3,34 @@
 
 #include<QDataStream>
 #include<QXmlStreamWriter>
+#include"point.h"
 
+/// @brief Класс автомобиля
 class Car
 {
-private:
-
 public:
-    float width;
-    float height;
-    Car():width(0),height(0){}
-    Car(float width, float height):width(width),height(height){}
-    Car(const Car& car):width(car.width), height(car.height){}
-    ~Car(){}
+    ///Конструктор по умолчанию
+    Car();
+
+    /// @brief Конструктор с параметрами
+    /// @param width ширина авто
+    /// @param height высота авто
+    /// @param speed скорость авто
+    Car(Scale scale, float speed);
+
+    /// @brief Конструктор копирования
+    /// @param car экземпляр авто
+    /// @return экземпляр авто
+    Car(const Car&car);
+
+    /// Масштабирование
+    Scale scale;
+
+    /// Скорость авто
+    float speed;
+
+    friend ostream& operator <<(ostream &out, const Car &b);
+    friend istream& operator >>(istream &in, Car &b);
     friend QDataStream& operator <<(QDataStream &out, const Car &car);
     friend QDataStream& operator >>(QDataStream &in, Car &car);
 };

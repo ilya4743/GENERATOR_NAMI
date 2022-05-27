@@ -74,8 +74,8 @@ public:
     Ui::MainWindow *ui;
     vector<Barrier> vec_barrier;
     vector<Barrier> vec_buf_barrier;
-    Point goal_point;
-    Point goal_point_buf;
+    Position goal_point;
+    Position goal_point_buf;
     int count_line;
     int count_line_buf;
     int countSendPack;

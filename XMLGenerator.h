@@ -40,8 +40,8 @@ class XMLGenerator
 {
 private:
 public:
-    static void exportXML(const QString& str, const GameMap& map, const Car& car, const Point& goal_point, const std::vector<Barrier>& vec_barrier);
-    static void importXML(QString& str, GameMap& map, Car& car, Point& goal_point, std::vector<Barrier>& vec_barrier, int& countBarriers);
+    static void exportXML(const QString& str, const GameMap& map, const Car& car, const Position& goal_point, const std::vector<Barrier>& vec_barrier);
+    static void importXML(QString& str, GameMap& map, Car& car, Position& goal_point, std::vector<Barrier>& vec_barrier, int& countBarriers);
 };
 
 #endif

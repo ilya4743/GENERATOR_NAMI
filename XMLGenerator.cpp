@@ -23,9 +23,9 @@ bool GeneratorXMLParser::startElement (const QString& namespaceURI, const QStrin
     {
         if(name=="position")
         {
-            if(attrs.qName(0)=='x' && attrs.qName(1)=='y' && attrs.qName(2)=='z')
+            if(attrs.qName(0)=='x' && attrs.qName(1)=='y' && attrs.qName(2)=='z' && attrs.qName(3)=='w')
             {
-                *dataStream<<attrs.value(0).toFloat()<<attrs.value(1).toFloat()<<attrs.value(2).toFloat();
+                *dataStream<<attrs.value(0).toFloat()<<attrs.value(1).toFloat()<<attrs.value(2).toFloat()<<attrs.value(3).toFloat();
                 pos++;
                 return true;
             }
@@ -46,9 +46,9 @@ bool GeneratorXMLParser::startElement (const QString& namespaceURI, const QStrin
             isMap=true;
             return true;
         }
-        if(name=="Car")
+        if(name=="car")
         {
-            *dataStream<<attrs.value(0).toFloat()<<attrs.value(1).toFloat();
+            *dataStream<<attrs.value(0).toFloat()<<attrs.value(1).toFloat()<<attrs.value(2).toFloat();
             isCar=true;
             return true;
         }
@@ -93,7 +93,7 @@ bool GeneratorXMLParser::endDocument()
     return isGoal&&isMap&&isCar;
 }
 
-void XMLGenerator::exportXML(const QString& str, const GameMap& map, const Car& car, const Point& goal_point, const std::vector<Barrier>& vec_barrier)
+void XMLGenerator::exportXML(const QString& str, const GameMap& map, const Car& car, const Position& goal_point, const std::vector<Barrier>& vec_barrier)
 {
     QFile file(str);
     if(file.open(QIODevice::WriteOnly))
@@ -134,7 +134,7 @@ void XMLGenerator::exportXML(const QString& str, const GameMap& map, const Car& 
     file.close();
 }
 
-void XMLGenerator::importXML(QString& str, GameMap& map, Car& car, Point& goal_point, std::vector<Barrier>& vec_barrier, int& countBarriers)
+void XMLGenerator::importXML(QString& str, GameMap& map, Car& car, Position& goal_point, std::vector<Barrier>& vec_barrier, int& countBarriers)
 {
     GeneratorXMLParser handler;
     QFile file(str);
@@ -146,9 +146,11 @@ void XMLGenerator::importXML(QString& str, GameMap& map, Car& car, Point& goal_p
         reader.setErrorHandler(&handler);
         if(reader.parse(source))
         {
-            float x, y, width, height;
+            float x, y, scale;
+
             GameMap m;
             Car c;
+            Barrier bar;
             QDataStream stream(&handler.data, QIODevice::ReadOnly);
             stream>>map;
             stream>>car;
@@ -156,11 +158,8 @@ void XMLGenerator::importXML(QString& str, GameMap& map, Car& car, Point& goal_p
             vec_barrier.clear();
             while(!stream.atEnd())
             {
-                stream>>x>>y;
-                stream.skipRawData(4);
-                stream>>width>>height;
-                stream.skipRawData(4);
-                vec_barrier.push_back(Barrier(x,y,width,height));
+                stream>>bar;
+                vec_barrier.push_back(bar);
                 ++countBarriers;
             }
         }
